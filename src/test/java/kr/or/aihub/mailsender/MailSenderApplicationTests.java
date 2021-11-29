@@ -1,4 +1,4 @@
-package or.kr.aihub.mailsender;
+package kr.or.aihub.mailsender;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;

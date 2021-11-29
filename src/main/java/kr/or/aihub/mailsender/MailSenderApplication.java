@@ -1,4 +1,4 @@
-package or.kr.aihub.mailsender;
+package kr.or.aihub.mailsender;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
