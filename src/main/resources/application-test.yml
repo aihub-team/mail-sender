@@ -1,0 +1,9 @@
+spring:
+  config:
+    activate:
+      on-profile: test
+  datasource:
+    url: jdbc:h2:~/data/test/mail-sender
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
