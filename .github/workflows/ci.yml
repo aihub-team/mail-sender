@@ -43,10 +43,12 @@ jobs:
         run: |
           docker build -t ${{ secrets.DOCKER_BUILD_TAG_NAME }} .
           docker tag ${{ secrets.DOCKER_BUILD_TAG_NAME }} ${{ secrets.DOCKER_USERNAME }}/${{ secrets.DOCKER_REPOSITORY_NAME }}:${GITHUB_SHA::7}
+          docker tag ${{ secrets.DOCKER_BUILD_TAG_NAME }} ${{ secrets.DOCKER_USERNAME }}/${{ secrets.DOCKER_REPOSITORY_NAME }}:latest
 
       - name: Docker image push to image repository
         if: github.ref == 'refs/heads/main'
         run: |
           docker push ${{ secrets.DOCKER_USERNAME }}/${{ secrets.DOCKER_REPOSITORY_NAME }}:${GITHUB_SHA::7}
+          docker push ${{ secrets.DOCKER_USERNAME }}/${{ secrets.DOCKER_REPOSITORY_NAME }}:latest
 
       # 이후 서버에 도커 이미지를 다운받아서 실행해야 합니다.
