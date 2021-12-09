@@ -38,3 +38,6 @@ out/
 
 ### Production Settings ###
 application-prod.yml
+
+### github actions self-hosted runner
+actions-runner
