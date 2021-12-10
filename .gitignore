@@ -41,3 +41,9 @@ application-prod.yml
 
 ### github actions self-hosted runner
 actions-runner
+
+### enviorments
+.env
+
+### docker mounted files
+docker/
