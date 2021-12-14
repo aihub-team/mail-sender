@@ -1,4 +1,4 @@
-package kr.or.aihub.mailsender;
+package kr.or.aihub.mailsender.config;
 
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
