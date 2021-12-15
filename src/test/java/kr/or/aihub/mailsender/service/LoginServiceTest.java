@@ -15,7 +15,7 @@ class LoginServiceTest {
 
     @BeforeEach
     void setUp() {
-        loginService = new LoginService(SECRET);
+        loginService = new LoginService(new JwtEncoder(SECRET));
     }
 
     @Test

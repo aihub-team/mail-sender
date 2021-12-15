@@ -1,22 +1,17 @@
 package kr.or.aihub.mailsender.service;
 
-import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.security.Keys;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.security.Key;
 
 /**
  * 로그인 처리 담당.
  */
 @Service
 public class LoginService {
-    private Key key;
+    private JwtEncoder jwtEncoder;
 
-    public LoginService(@Value("${jwt.secret}") String secret) {
-        key = Keys.hmacShaKeyFor(secret.getBytes());
+    public LoginService(JwtEncoder jwtEncoder) {
+        this.jwtEncoder = jwtEncoder;
     }
 
     /**
@@ -27,9 +22,8 @@ public class LoginService {
      */
     @Transactional
     public String login(String username) {
-        return Jwts.builder()
-                .claim("username", username)
-                .signWith(key)
-                .compact();
+        String accessToken = jwtEncoder.encode(username);
+
+        return accessToken;
     }
 }
