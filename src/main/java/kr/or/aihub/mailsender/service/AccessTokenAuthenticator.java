@@ -1,6 +1,7 @@
 package kr.or.aihub.mailsender.service;
 
 import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.MalformedJwtException;
 import io.jsonwebtoken.security.Keys;
 import io.jsonwebtoken.security.SignatureException;
 import org.springframework.beans.factory.annotation.Value;
@@ -36,7 +37,7 @@ public class AccessTokenAuthenticator {
                     .build()
                     .parseClaimsJws(accessToken)
                     .getBody();
-        } catch (SignatureException e) {
+        } catch (SignatureException | MalformedJwtException e) {
             return false;
         }
 
