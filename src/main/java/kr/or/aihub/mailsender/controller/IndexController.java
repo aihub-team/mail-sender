@@ -1,5 +1,6 @@
 package kr.or.aihub.mailsender.controller;
 
+import kr.or.aihub.mailsender.errors.InvalidAccessTokenException;
 import kr.or.aihub.mailsender.service.AccessTokenAuthenticator;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -25,7 +26,7 @@ public class IndexController {
 
         boolean accessTokenInvalid = accessTokenAuthenticator.authenticate(accessToken);
         if (!accessTokenInvalid) {
-            return new ResponseEntity<>("올바르지 않은 액세스 토큰입니다.", HttpStatus.UNAUTHORIZED);
+            throw new InvalidAccessTokenException();
         }
 
         return new ResponseEntity<>(HttpStatus.OK);
