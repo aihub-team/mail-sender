@@ -24,8 +24,8 @@ public class IndexController {
     ) {
         String accessToken = authorization.substring("Bearer ".length());
 
-        boolean accessTokenInvalid = accessTokenAuthenticator.authenticate(accessToken);
-        if (!accessTokenInvalid) {
+        boolean accessTokenValid = accessTokenAuthenticator.authenticate(accessToken);
+        if (!accessTokenValid) {
             throw new InvalidAccessTokenException();
         }
 
