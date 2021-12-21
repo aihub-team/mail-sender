@@ -22,6 +22,7 @@ public class AccessTokenAuthenticator {
 
     /**
      * 액세스 토큰을 해석하여 올바르면 true, 그렇지 않다면 false를 리턴합니다.
+     * 이 메서드를 사용하는 곳에서 false를 리턴한다면 에러를 던지게 해야 합니다.
      *
      * @param accessToken 액세스 토큰
      * @return 액세스 토큰이 올바르면 true, 그렇지 않다면 false
