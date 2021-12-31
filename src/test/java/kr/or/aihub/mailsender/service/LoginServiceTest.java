@@ -1,6 +1,5 @@
 package kr.or.aihub.mailsender.service;
 
-import kr.or.aihub.mailsender.dto.SessionCreateRequestData;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -19,13 +18,9 @@ class LoginServiceTest {
     }
 
     @Test
-    @DisplayName("login메서드는 액세스 토큰을 리턴한다")
+    @DisplayName("login메서드는 username이 주어지면 액세스 토큰을 리턴한다")
     void login() {
-        SessionCreateRequestData sessionCreateRequestData = SessionCreateRequestData.builder()
-                .username("username")
-                .password("password")
-                .build();
-        String username = sessionCreateRequestData.getUsername();
+        String username = "username";
 
         String accessToken = loginService.login(username);
 
