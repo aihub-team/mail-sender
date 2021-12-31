@@ -1,7 +1,7 @@
 package kr.or.aihub.mailsender.controller;
 
-import kr.or.aihub.mailsender.dto.PostSessionRequestData;
-import kr.or.aihub.mailsender.dto.PostSessionResponseData;
+import kr.or.aihub.mailsender.dto.SessionCreateRequestData;
+import kr.or.aihub.mailsender.dto.SessionCreateResponseData;
 import kr.or.aihub.mailsender.service.LoginService;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
@@ -22,19 +22,19 @@ public class SessionController {
      * 로그인 요청을 수행합니다.
      * 새로 발급한 액세스 토큰을 리턴합니다.
      *
-     * @param postSessionRequestData 토큰 생성시 필요한 데이터
+     * @param sessionCreateRequestData 토큰 생성시 필요한 데이터
      * @return 새로 발급한 액세스 토큰
      */
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public PostSessionResponseData postSession(
-            @RequestBody PostSessionRequestData postSessionRequestData
+    public SessionCreateResponseData postSession(
+            @RequestBody SessionCreateRequestData sessionCreateRequestData
     ) {
-        String username = postSessionRequestData.getUsername();
+        String username = sessionCreateRequestData.getUsername();
 
         String accessToken = loginService.login(username);
 
-        return PostSessionResponseData.builder()
+        return SessionCreateResponseData.builder()
                 .accessToken(accessToken)
                 .build();
     }

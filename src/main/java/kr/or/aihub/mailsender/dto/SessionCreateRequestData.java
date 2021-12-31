@@ -4,12 +4,12 @@ import lombok.Builder;
 import lombok.Getter;
 
 @Getter
-public class PostSessionRequestData {
+public class SessionCreateRequestData {
     private String username;
     private String password;
 
     @Builder
-    public PostSessionRequestData(String username, String password) {
+    public SessionCreateRequestData(String username, String password) {
         this.username = username;
         this.password = password;
     }

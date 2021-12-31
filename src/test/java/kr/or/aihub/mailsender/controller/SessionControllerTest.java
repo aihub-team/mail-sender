@@ -1,7 +1,7 @@
 package kr.or.aihub.mailsender.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import kr.or.aihub.mailsender.dto.PostSessionRequestData;
+import kr.or.aihub.mailsender.dto.SessionCreateRequestData;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -33,9 +33,9 @@ class SessionControllerTest {
     }
 
     @Test
-    @DisplayName("POST /session 요청은 올바른 PostSessionRequestData가 주어질 경우 201과 액세스 토큰을 응답한다")
+    @DisplayName("POST /session 요청은 올바른 데이터가 주어질 경우 201과 액세스 토큰을 응답한다")
     void postSession() throws Exception {
-        PostSessionRequestData postSessionRequestData = PostSessionRequestData.builder()
+        SessionCreateRequestData sessionCreateRequestData = SessionCreateRequestData.builder()
                 .username("username")
                 .password("password")
                 .build();
@@ -43,7 +43,7 @@ class SessionControllerTest {
         ResultActions actions =
                 mockMvc.perform(
                         post("/session")
-                                .content(objectMapper.writeValueAsString(postSessionRequestData))
+                                .content(objectMapper.writeValueAsString(sessionCreateRequestData))
                                 .contentType(MediaType.APPLICATION_JSON)
                 );
 

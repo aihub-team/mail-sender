@@ -4,11 +4,11 @@ import lombok.Builder;
 import lombok.Getter;
 
 @Getter
-public class PostSessionResponseData {
+public class SessionCreateResponseData {
     private String accessToken;
 
     @Builder
-    public PostSessionResponseData(String accessToken) {
+    public SessionCreateResponseData(String accessToken) {
         this.accessToken = accessToken;
     }
 }
