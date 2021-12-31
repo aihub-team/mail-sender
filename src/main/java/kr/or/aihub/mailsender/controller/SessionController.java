@@ -25,10 +25,9 @@ public class SessionController {
     }
 
     /**
-     * 로그인 요청을 수행합니다.
-     * 새로 발급한 액세스 토큰을 리턴합니다.
+     * 세션 생성에 필요한 정보를 받아, 새로 발급한 액세스 토큰을 리턴합니다.
      *
-     * @param sessionCreateRequestData 토큰 생성시 필요한 데이터
+     * @param sessionCreateRequestData 세션 생성시 필요 데이터
      * @return 새로 발급한 액세스 토큰
      */
     @PostMapping
