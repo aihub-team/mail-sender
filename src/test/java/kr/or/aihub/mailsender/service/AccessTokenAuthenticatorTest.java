@@ -4,22 +4,20 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
 
 import java.util.Arrays;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+@SpringBootTest
 class AccessTokenAuthenticatorTest {
-    private static final String SECRET = "12345678901234567890123456789012";
     private static final String VALID_TOKEN = "eyJhbGciOiJIUzI1NiJ9.eyJ1c2VybmFtZSI6InVzZXJuYW1lIn0.Lz32Q7FAltMuGgSo1GNHFKMeCP_KBSBIohDELWHJ8xM";
 
+    @Autowired
     private AccessTokenAuthenticator accessTokenAuthenticator;
-
-    @BeforeEach
-    void setUp() {
-        accessTokenAuthenticator = new AccessTokenAuthenticator(SECRET);
-    }
 
     @Nested
     @DisplayName("authenticate 메서드는")
