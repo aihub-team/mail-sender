@@ -6,6 +6,8 @@ import kr.or.aihub.mailsender.service.LoginService;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
+import javax.validation.Valid;
+
 /**
  * 세션 관련 HTTP 요청 처리 담당.
  */
@@ -28,7 +30,7 @@ public class SessionController {
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public SessionCreateResponseData postSession(
-            @RequestBody SessionCreateRequestData sessionCreateRequestData
+            @RequestBody @Valid SessionCreateRequestData sessionCreateRequestData
     ) {
         String username = sessionCreateRequestData.getUsername();
 
