@@ -15,8 +15,6 @@ import org.springframework.test.web.servlet.ResultActions;
 
 import java.util.Arrays;
 import java.util.List;
-import java.util.function.Function;
-import java.util.stream.Collectors;
 
 import static org.hamcrest.Matchers.containsString;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -78,31 +76,15 @@ class SessionControllerTest {
 
             @BeforeEach
             void setUp() {
-                List<List<String>> inValidDataAttributes = Arrays.asList(
-                        Arrays.asList(null, null),
-                        Arrays.asList("username", null),
-                        Arrays.asList(null, "password"),
-                        Arrays.asList("1", "password"),
-                        Arrays.asList("123456789012345678901", "password"),
-                        Arrays.asList("username", "123"),
-                        Arrays.asList("username", "123456789012345678901")
+                invalidSessionCreateRequestDataList = Arrays.asList(
+                        new SessionCreateRequestData(null, null),
+                        new SessionCreateRequestData("username", null),
+                        new SessionCreateRequestData(null, "password"),
+                        new SessionCreateRequestData("1", "password"),
+                        new SessionCreateRequestData("123456789012345678901", "password"),
+                        new SessionCreateRequestData("username", "123"),
+                        new SessionCreateRequestData("username", "123456789012345678901")
                 );
-
-                invalidSessionCreateRequestDataList = inValidDataAttributes.stream()
-                        .map(getSessionCreateRequestData())
-                        .collect(Collectors.toList());
-            }
-
-            private Function<List<String>, SessionCreateRequestData> getSessionCreateRequestData() {
-                return it -> {
-                    String username = it.get(0);
-                    String password = it.get(1);
-
-                    return SessionCreateRequestData.builder()
-                            .username(username)
-                            .password(password)
-                            .build();
-                };
             }
 
             @Test
