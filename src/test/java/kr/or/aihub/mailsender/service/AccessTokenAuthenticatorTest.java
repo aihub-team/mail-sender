@@ -1,5 +1,7 @@
 package kr.or.aihub.mailsender.service;
 
+import io.jsonwebtoken.security.SignatureException;
+import kr.or.aihub.mailsender.errors.EmptyAccessTokenException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -10,7 +12,8 @@ import org.springframework.boot.test.context.SpringBootTest;
 import java.util.Arrays;
 import java.util.List;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatCode;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 @SpringBootTest
 class AccessTokenAuthenticatorTest {
@@ -26,7 +29,6 @@ class AccessTokenAuthenticatorTest {
         @Nested
         @DisplayName("올바른 액세스 토큰이 주어질 경우")
         class Context_validToken {
-
             private String validAccessToken;
 
             @BeforeEach
@@ -35,11 +37,35 @@ class AccessTokenAuthenticatorTest {
             }
 
             @Test
-            @DisplayName("true를 리턴한다")
-            void it_returns_true() {
-                boolean actual = accessTokenAuthenticator.authenticate(validAccessToken);
+            @DisplayName("에러가 발생하지 않는다.")
+            void it_does_not_throw() {
+                assertThatCode(() -> {
+                    accessTokenAuthenticator.authenticate(validAccessToken);
+                }).doesNotThrowAnyException();
+            }
+        }
 
-                assertThat(actual).isTrue();
+        @Nested
+        @DisplayName("빈 토큰이 주어진 경우")
+        class Context_emptyAccessToken {
+            private List<String> emptyAccessTokens;
+
+            @BeforeEach
+            void setUp() {
+                emptyAccessTokens = Arrays.asList(
+                        null,
+                        ""
+                );
+            }
+
+            @Test
+            @DisplayName("에러를 던진다")
+            void it_throws_InvalidAccessTokenException() {
+                for (String emptyAccessToken : emptyAccessTokens) {
+                    assertThatThrownBy(() -> {
+                        accessTokenAuthenticator.authenticate(emptyAccessToken);
+                    }).isInstanceOf(EmptyAccessTokenException.class);
+                }
             }
         }
 
@@ -52,19 +78,17 @@ class AccessTokenAuthenticatorTest {
             void setUp() {
                 invalidAccessTokens = Arrays.asList(
                         VALID_TOKEN + "x",
-                        VALID_TOKEN.substring(0, VALID_TOKEN.length() - 1),
-                        null,
-                        ""
+                        VALID_TOKEN.substring(0, VALID_TOKEN.length() - 1)
                 );
             }
 
             @Test
-            @DisplayName("false를 리턴한다")
-            void it_returns_false() {
+            @DisplayName("SignatureException 에러를 던진다")
+            void it_throw_SignatureException() {
                 for (String invalidAccessToken : invalidAccessTokens) {
-                    boolean actual = accessTokenAuthenticator.authenticate(invalidAccessToken);
-
-                    assertThat(actual).isFalse();
+                    assertThatThrownBy(() -> {
+                        accessTokenAuthenticator.authenticate(invalidAccessToken);
+                    }).isInstanceOf(SignatureException.class);
                 }
             }
         }

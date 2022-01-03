@@ -1,7 +1,6 @@
 package kr.or.aihub.mailsender.filters;
 
 import kr.or.aihub.mailsender.auth.UserAuthentication;
-import kr.or.aihub.mailsender.errors.InvalidAccessTokenException;
 import kr.or.aihub.mailsender.errors.NoExistAccessTokenException;
 import kr.or.aihub.mailsender.service.AccessTokenAuthenticator;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -33,10 +32,7 @@ public class JwtAuthenticationFilter extends BasicAuthenticationFilter {
                 .orElseThrow(NoExistAccessTokenException::new);
         String accessToken = getAccessToken(authorizationRequestHeader);
 
-        boolean accessTokenValid = accessTokenAuthenticator.authenticate(accessToken);
-        if (!accessTokenValid) {
-            throw new InvalidAccessTokenException();
-        }
+        accessTokenAuthenticator.authenticate(accessToken);
 
         SecurityContext securityContext = SecurityContextHolder.getContext();
         securityContext.setAuthentication(new UserAuthentication());

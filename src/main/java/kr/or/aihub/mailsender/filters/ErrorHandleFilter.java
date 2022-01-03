@@ -1,6 +1,8 @@
 package kr.or.aihub.mailsender.filters;
 
-import kr.or.aihub.mailsender.errors.InvalidAccessTokenException;
+import io.jsonwebtoken.MalformedJwtException;
+import io.jsonwebtoken.security.SignatureException;
+import kr.or.aihub.mailsender.errors.EmptyAccessTokenException;
 import kr.or.aihub.mailsender.errors.NoExistAccessTokenException;
 import org.springframework.http.HttpStatus;
 
@@ -22,7 +24,7 @@ public class ErrorHandleFilter extends HttpFilter {
             chain.doFilter(request, response);
         } catch (NoExistAccessTokenException e) {
             response.sendError(HttpStatus.BAD_REQUEST.value());
-        } catch (InvalidAccessTokenException e) {
+        } catch (EmptyAccessTokenException | SignatureException | MalformedJwtException e) {
             response.sendError(HttpStatus.UNAUTHORIZED.value());
         }
     }
