@@ -9,7 +9,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest
 class LoginServiceTest {
-    private static final String VALID_TOKEN = "eyJhbGciOiJIUzI1NiJ9.eyJ1c2VybmFtZSI6InVzZXJuYW1lIn0.Lz32Q7FAltMuGgSo1GNHFKMeCP_KBSBIohDELWHJ8xM";
+    private static final String TOKEN_REGEX = "^[A-Za-z0-9-_=]+\\.[A-Za-z0-9-_=]+\\.?[A-Za-z0-9-_.+/=]*$";
 
     @Autowired
     private LoginService loginService;
@@ -21,6 +21,6 @@ class LoginServiceTest {
 
         String accessToken = loginService.login(username);
 
-        assertThat(accessToken).isEqualTo(VALID_TOKEN);
+        assertThat(accessToken).matches(TOKEN_REGEX);
     }
 }

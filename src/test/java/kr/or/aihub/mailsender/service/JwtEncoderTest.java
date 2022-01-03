@@ -9,7 +9,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest
 class JwtEncoderTest {
-    private static final String VALID_TOKEN = "eyJhbGciOiJIUzI1NiJ9.eyJ1c2VybmFtZSI6InVzZXJuYW1lIn0.Lz32Q7FAltMuGgSo1GNHFKMeCP_KBSBIohDELWHJ8xM";
+    private static final String TOKEN_REGEX = "^[A-Za-z0-9-_=]+\\.[A-Za-z0-9-_=]+\\.?[A-Za-z0-9-_.+/=]*$";
+
 
     @Autowired
     private JwtEncoder jwtEncoder;
@@ -17,8 +18,10 @@ class JwtEncoderTest {
     @Test
     @DisplayName("encode 메서드는 암호화된 액세스 토큰을 리턴한다")
     void encode() {
-        String accessToken = jwtEncoder.encode("username");
+        String username = "username";
 
-        assertThat(accessToken).isEqualTo(VALID_TOKEN);
+        String accessToken = jwtEncoder.encode(username);
+
+        assertThat(accessToken).matches(TOKEN_REGEX);
     }
 }
