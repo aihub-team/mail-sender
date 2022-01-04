@@ -17,7 +17,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 @SpringBootTest
 class JwtCredentialsAuthenticatorTest {
-    private static final String VALID_TOKEN = "eyJhbGciOiJIUzI1NiJ9.eyJ1c2VybmFtZSI6InVzZXJuYW1lIn0.Lz32Q7FAltMuGgSo1GNHFKMeCP_KBSBIohDELWHJ8xM";
+    private static final String VALID_JWT_CREDENTIAL = "eyJhbGciOiJIUzI1NiJ9.eyJ1c2VybmFtZSI6InVzZXJuYW1lIn0.Lz32Q7FAltMuGgSo1GNHFKMeCP_KBSBIohDELWHJ8xM";
 
     @Autowired
     private JwtCredentialsAuthenticator jwtCredentialsAuthenticator;
@@ -27,32 +27,32 @@ class JwtCredentialsAuthenticatorTest {
     class Describe_authenticate {
 
         @Nested
-        @DisplayName("올바른 액세스 토큰이 주어질 경우")
+        @DisplayName("올바른 Jwt 자격 증명이 주어질 경우")
         class Context_validToken {
-            private String validAccessToken;
+            private String validJwtCredential;
 
             @BeforeEach
             void setUp() {
-                validAccessToken = VALID_TOKEN;
+                validJwtCredential = VALID_JWT_CREDENTIAL;
             }
 
             @Test
             @DisplayName("에러가 발생하지 않는다.")
             void it_does_not_throw() {
                 assertThatCode(() -> {
-                    jwtCredentialsAuthenticator.authenticate(validAccessToken);
+                    jwtCredentialsAuthenticator.authenticate(validJwtCredential);
                 }).doesNotThrowAnyException();
             }
         }
 
         @Nested
-        @DisplayName("빈 토큰이 주어진 경우")
-        class Context_emptyAccessToken {
-            private List<String> emptyAccessTokens;
+        @DisplayName("빈 Jwt 자격 증명일 경우")
+        class Context_emptyJwtCredentials {
+            private List<String> emptyJwtCredentials;
 
             @BeforeEach
             void setUp() {
-                emptyAccessTokens = Arrays.asList(
+                emptyJwtCredentials = Arrays.asList(
                         null,
                         ""
                 );
@@ -61,33 +61,33 @@ class JwtCredentialsAuthenticatorTest {
             @Test
             @DisplayName("EmptyJwtCredentialsException 에러를 던진다")
             void it_throws_EmptyJwtCredentialsException() {
-                for (String emptyAccessToken : emptyAccessTokens) {
+                for (String emptyJwtCredential : emptyJwtCredentials) {
                     assertThatThrownBy(() -> {
-                        jwtCredentialsAuthenticator.authenticate(emptyAccessToken);
+                        jwtCredentialsAuthenticator.authenticate(emptyJwtCredential);
                     }).isInstanceOf(EmptyJwtCredentialsException.class);
                 }
             }
         }
 
         @Nested
-        @DisplayName("올바르지 않은 액세스 토큰이 주어질 경우")
-        class Context_invalidAccessToken {
-            private List<String> invalidAccessTokens;
+        @DisplayName("올바르지 않은 Jwt 자격 증명이 주어질 경우")
+        class Context_invalidJwtCredential {
+            private List<String> invalidJwtCredentials;
 
             @BeforeEach
             void setUp() {
-                invalidAccessTokens = Arrays.asList(
-                        VALID_TOKEN + "x",
-                        VALID_TOKEN.substring(0, VALID_TOKEN.length() - 1)
+                invalidJwtCredentials = Arrays.asList(
+                        VALID_JWT_CREDENTIAL + "x",
+                        VALID_JWT_CREDENTIAL.substring(0, VALID_JWT_CREDENTIAL.length() - 1)
                 );
             }
 
             @Test
             @DisplayName("SignatureException 에러를 던진다")
             void it_throw_SignatureException() {
-                for (String invalidAccessToken : invalidAccessTokens) {
+                for (String invalidJwtCredential : invalidJwtCredentials) {
                     assertThatThrownBy(() -> {
-                        jwtCredentialsAuthenticator.authenticate(invalidAccessToken);
+                        jwtCredentialsAuthenticator.authenticate(invalidJwtCredential);
                     }).isInstanceOf(SignatureException.class);
                 }
             }
