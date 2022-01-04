@@ -1,4 +1,4 @@
-package kr.or.aihub.mailsender;
+package kr.or.aihub.mailsender.controller;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
