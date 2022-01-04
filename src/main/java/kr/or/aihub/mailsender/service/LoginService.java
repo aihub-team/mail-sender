@@ -8,10 +8,10 @@ import org.springframework.transaction.annotation.Transactional;
  */
 @Service
 public class LoginService {
-    private JwtCredentialsEncoder jwtCredentialsEncoder;
+    private JwtCredentialEncoder jwtCredentialEncoder;
 
-    public LoginService(JwtCredentialsEncoder jwtCredentialsEncoder) {
-        this.jwtCredentialsEncoder = jwtCredentialsEncoder;
+    public LoginService(JwtCredentialEncoder jwtCredentialEncoder) {
+        this.jwtCredentialEncoder = jwtCredentialEncoder;
     }
 
     /**
@@ -22,7 +22,7 @@ public class LoginService {
      */
     @Transactional
     public String login(String username) {
-        String accessToken = jwtCredentialsEncoder.encode(username);
+        String accessToken = jwtCredentialEncoder.encode(username);
 
         return accessToken;
     }

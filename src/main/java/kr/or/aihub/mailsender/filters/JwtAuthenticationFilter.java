@@ -1,9 +1,9 @@
 package kr.or.aihub.mailsender.filters;
 
 import kr.or.aihub.mailsender.auth.UserAuthentication;
-import kr.or.aihub.mailsender.errors.EmptyJwtCredentialsException;
+import kr.or.aihub.mailsender.errors.EmptyJwtCredentialException;
 import kr.or.aihub.mailsender.errors.NotAllowedJwtTypeException;
-import kr.or.aihub.mailsender.service.JwtCredentialsAuthenticator;
+import kr.or.aihub.mailsender.service.JwtCredentialAuthenticator;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -20,20 +20,20 @@ import java.util.Optional;
  * JWT 인증을 담당하는 필터.
  */
 public class JwtAuthenticationFilter extends BasicAuthenticationFilter {
-    private final JwtCredentialsAuthenticator jwtCredentialsAuthenticator;
+    private final JwtCredentialAuthenticator jwtCredentialAuthenticator;
 
-    public JwtAuthenticationFilter(AuthenticationManager authenticationManager, JwtCredentialsAuthenticator jwtCredentialsAuthenticator) {
+    public JwtAuthenticationFilter(AuthenticationManager authenticationManager, JwtCredentialAuthenticator jwtCredentialAuthenticator) {
         super(authenticationManager);
-        this.jwtCredentialsAuthenticator = jwtCredentialsAuthenticator;
+        this.jwtCredentialAuthenticator = jwtCredentialAuthenticator;
     }
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain) throws IOException, ServletException {
         String authorizationHttpRequestHeader = getAuthorizationRequestHeader(request)
-                .orElseThrow(EmptyJwtCredentialsException::new);
+                .orElseThrow(EmptyJwtCredentialException::new);
         String jwtCredentials = getJwtCredentials(authorizationHttpRequestHeader);
 
-        jwtCredentialsAuthenticator.authenticate(jwtCredentials);
+        jwtCredentialAuthenticator.authenticate(jwtCredentials);
 
         SecurityContext securityContext = SecurityContextHolder.getContext();
         securityContext.setAuthentication(new UserAuthentication());

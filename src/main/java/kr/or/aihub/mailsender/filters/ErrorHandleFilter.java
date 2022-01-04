@@ -2,7 +2,7 @@ package kr.or.aihub.mailsender.filters;
 
 import io.jsonwebtoken.MalformedJwtException;
 import io.jsonwebtoken.security.SignatureException;
-import kr.or.aihub.mailsender.errors.EmptyJwtCredentialsException;
+import kr.or.aihub.mailsender.errors.EmptyJwtCredentialException;
 import kr.or.aihub.mailsender.errors.NotAllowedJwtTypeException;
 import org.springframework.http.HttpStatus;
 
@@ -22,7 +22,7 @@ public class ErrorHandleFilter extends HttpFilter {
     protected void doFilter(HttpServletRequest request, HttpServletResponse response, FilterChain chain) throws IOException, ServletException {
         try {
             chain.doFilter(request, response);
-        } catch (EmptyJwtCredentialsException | NotAllowedJwtTypeException e) {
+        } catch (EmptyJwtCredentialException | NotAllowedJwtTypeException e) {
             response.sendError(HttpStatus.BAD_REQUEST.value());
         } catch (SignatureException | MalformedJwtException e) {
             response.sendError(HttpStatus.UNAUTHORIZED.value());

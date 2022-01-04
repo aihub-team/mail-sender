@@ -1,7 +1,7 @@
 package kr.or.aihub.mailsender.service;
 
 import io.jsonwebtoken.security.SignatureException;
-import kr.or.aihub.mailsender.errors.EmptyJwtCredentialsException;
+import kr.or.aihub.mailsender.errors.EmptyJwtCredentialException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -16,11 +16,11 @@ import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 @SpringBootTest
-class JwtCredentialsAuthenticatorTest {
+class JwtCredentialAuthenticatorTest {
     private static final String VALID_JWT_CREDENTIAL = "eyJhbGciOiJIUzI1NiJ9.eyJ1c2VybmFtZSI6InVzZXJuYW1lIn0.Lz32Q7FAltMuGgSo1GNHFKMeCP_KBSBIohDELWHJ8xM";
 
     @Autowired
-    private JwtCredentialsAuthenticator jwtCredentialsAuthenticator;
+    private JwtCredentialAuthenticator jwtCredentialAuthenticator;
 
     @Nested
     @DisplayName("authenticate 메서드는")
@@ -40,7 +40,7 @@ class JwtCredentialsAuthenticatorTest {
             @DisplayName("에러가 발생하지 않는다.")
             void it_does_not_throw() {
                 assertThatCode(() -> {
-                    jwtCredentialsAuthenticator.authenticate(validJwtCredential);
+                    jwtCredentialAuthenticator.authenticate(validJwtCredential);
                 }).doesNotThrowAnyException();
             }
         }
@@ -63,8 +63,8 @@ class JwtCredentialsAuthenticatorTest {
             void it_throws_EmptyJwtCredentialsException() {
                 for (String emptyJwtCredential : emptyJwtCredentials) {
                     assertThatThrownBy(() -> {
-                        jwtCredentialsAuthenticator.authenticate(emptyJwtCredential);
-                    }).isInstanceOf(EmptyJwtCredentialsException.class);
+                        jwtCredentialAuthenticator.authenticate(emptyJwtCredential);
+                    }).isInstanceOf(EmptyJwtCredentialException.class);
                 }
             }
         }
@@ -87,7 +87,7 @@ class JwtCredentialsAuthenticatorTest {
             void it_throw_SignatureException() {
                 for (String invalidJwtCredential : invalidJwtCredentials) {
                     assertThatThrownBy(() -> {
-                        jwtCredentialsAuthenticator.authenticate(invalidJwtCredential);
+                        jwtCredentialAuthenticator.authenticate(invalidJwtCredential);
                     }).isInstanceOf(SignatureException.class);
                 }
             }
