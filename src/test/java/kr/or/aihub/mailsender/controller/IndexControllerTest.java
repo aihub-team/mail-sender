@@ -102,13 +102,13 @@ class IndexControllerTest {
         }
 
         @Nested
-        @DisplayName("Authorization 헤더가 올바르지 않은 타입이라면")
-        class Context_AuthorizationHeaderStartsInValidType {
-            private String inValidAuthorizationHeaderType;
+        @DisplayName("Authorization 헤더가 허용되지 않은 Jwt 타입이라면")
+        class Context_notAllowedJwtType {
+            private String notAllowedJwtType;
 
             @BeforeEach
             void setUp() {
-                inValidAuthorizationHeaderType = "ABCDEF ";
+                notAllowedJwtType = "ABCDEF ";
             }
 
             @Test
@@ -116,7 +116,7 @@ class IndexControllerTest {
             void it_response_400() throws Exception {
                 ResultActions actions = mockMvc.perform(
                         MockMvcRequestBuilders.get("/")
-                                .header("Authorization", inValidAuthorizationHeaderType + VALID_TOKEN)
+                                .header("Authorization", notAllowedJwtType + VALID_TOKEN)
                 );
 
                 actions

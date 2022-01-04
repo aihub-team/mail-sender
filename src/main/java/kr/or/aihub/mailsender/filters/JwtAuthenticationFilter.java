@@ -2,7 +2,7 @@ package kr.or.aihub.mailsender.filters;
 
 import kr.or.aihub.mailsender.auth.UserAuthentication;
 import kr.or.aihub.mailsender.errors.EmptyJwtCredentialsException;
-import kr.or.aihub.mailsender.errors.InvalidAuthorizationHeaderTypeException;
+import kr.or.aihub.mailsender.errors.NotAllowedJwtTypeException;
 import kr.or.aihub.mailsender.service.JwtCredentialsAuthenticator;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.core.context.SecurityContext;
@@ -52,14 +52,14 @@ public class JwtAuthenticationFilter extends BasicAuthenticationFilter {
      *
      * @param authorizationHeader Authorization 헤더 값
      * @return Jwt Credentials
-     * @throws InvalidAuthorizationHeaderTypeException Authorization 헤더가 올바르지 않은 타입일 경우
+     * @throws NotAllowedJwtTypeException 허용되지 않은 Jwt 타입일 경우
      */
     private String getJwtCredentials(String authorizationHeader) {
-        String validAuthorizationHeaderType = "Bearer ";
-        if (!authorizationHeader.startsWith(validAuthorizationHeaderType)) {
-            throw new InvalidAuthorizationHeaderTypeException();
+        String allowedJwtType = "Bearer ";
+        if (!authorizationHeader.startsWith(allowedJwtType)) {
+            throw new NotAllowedJwtTypeException();
         }
 
-        return authorizationHeader.replace(validAuthorizationHeaderType, "");
+        return authorizationHeader.replace(allowedJwtType, "");
     }
 }
