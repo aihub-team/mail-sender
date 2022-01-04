@@ -1,9 +1,9 @@
 package kr.or.aihub.mailsender.filters;
 
 import kr.or.aihub.mailsender.auth.UserAuthentication;
-import kr.or.aihub.mailsender.errors.EmptyAccessTokenException;
+import kr.or.aihub.mailsender.errors.EmptyJwtCredentialsException;
 import kr.or.aihub.mailsender.errors.InvalidAuthorizationHeaderTypeException;
-import kr.or.aihub.mailsender.service.AccessTokenAuthenticator;
+import kr.or.aihub.mailsender.service.JwtCredentialsAuthenticator;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -20,20 +20,20 @@ import java.util.Optional;
  * JWT 인증을 담당하는 필터.
  */
 public class JwtAuthenticationFilter extends BasicAuthenticationFilter {
-    private final AccessTokenAuthenticator accessTokenAuthenticator;
+    private final JwtCredentialsAuthenticator jwtCredentialsAuthenticator;
 
-    public JwtAuthenticationFilter(AuthenticationManager authenticationManager, AccessTokenAuthenticator accessTokenAuthenticator) {
+    public JwtAuthenticationFilter(AuthenticationManager authenticationManager, JwtCredentialsAuthenticator jwtCredentialsAuthenticator) {
         super(authenticationManager);
-        this.accessTokenAuthenticator = accessTokenAuthenticator;
+        this.jwtCredentialsAuthenticator = jwtCredentialsAuthenticator;
     }
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain) throws IOException, ServletException {
         String authorizationHttpRequestHeader = getAuthorizationRequestHeader(request)
-                .orElseThrow(EmptyAccessTokenException::new);
-        String accessToken = getAccessToken(authorizationHttpRequestHeader);
+                .orElseThrow(EmptyJwtCredentialsException::new);
+        String jwtCredentials = getJwtCredentials(authorizationHttpRequestHeader);
 
-        accessTokenAuthenticator.authenticate(accessToken);
+        jwtCredentialsAuthenticator.authenticate(jwtCredentials);
 
         SecurityContext securityContext = SecurityContextHolder.getContext();
         securityContext.setAuthentication(new UserAuthentication());
@@ -48,13 +48,13 @@ public class JwtAuthenticationFilter extends BasicAuthenticationFilter {
     }
 
     /**
-     * Authorization 헤더를 통해 얻은 액세스 토큰을 리턴합니다.
+     * Authorization 헤더를 통해 얻은 Jwt Credentials를 리턴합니다.
      *
      * @param authorizationHeader Authorization 헤더 값
-     * @return 액세스 토큰
+     * @return Jwt Credentials
      * @throws InvalidAuthorizationHeaderTypeException Authorization 헤더가 올바르지 않은 타입일 경우
      */
-    private String getAccessToken(String authorizationHeader) {
+    private String getJwtCredentials(String authorizationHeader) {
         String validAuthorizationHeaderType = "Bearer ";
         if (!authorizationHeader.startsWith(validAuthorizationHeaderType)) {
             throw new InvalidAuthorizationHeaderTypeException();

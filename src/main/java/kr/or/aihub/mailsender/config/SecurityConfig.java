@@ -2,7 +2,7 @@ package kr.or.aihub.mailsender.config;
 
 import kr.or.aihub.mailsender.filters.ErrorHandleFilter;
 import kr.or.aihub.mailsender.filters.JwtAuthenticationFilter;
-import kr.or.aihub.mailsender.service.AccessTokenAuthenticator;
+import kr.or.aihub.mailsender.service.JwtCredentialsAuthenticator;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -13,17 +13,17 @@ import javax.servlet.Filter;
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig extends WebSecurityConfigurerAdapter {
-    private final AccessTokenAuthenticator accessTokenAuthenticator;
+    private final JwtCredentialsAuthenticator jwtCredentialsAuthenticator;
 
-    public SecurityConfig(AccessTokenAuthenticator accessTokenAuthenticator) {
-        this.accessTokenAuthenticator = accessTokenAuthenticator;
+    public SecurityConfig(JwtCredentialsAuthenticator jwtCredentialsAuthenticator) {
+        this.jwtCredentialsAuthenticator = jwtCredentialsAuthenticator;
     }
 
     @Override
     protected void configure(HttpSecurity httpSecurity) throws Exception {
         Filter errorHandleFilter = new ErrorHandleFilter();
         Filter jwtAuthenticationFilter = new JwtAuthenticationFilter(authenticationManager(),
-                accessTokenAuthenticator);
+                jwtCredentialsAuthenticator);
 
         httpSecurity
                 .antMatcher("/")

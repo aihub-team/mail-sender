@@ -1,7 +1,7 @@
 package kr.or.aihub.mailsender.service;
 
 import io.jsonwebtoken.security.SignatureException;
-import kr.or.aihub.mailsender.errors.EmptyAccessTokenException;
+import kr.or.aihub.mailsender.errors.EmptyJwtCredentialsException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -16,11 +16,11 @@ import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 @SpringBootTest
-class AccessTokenAuthenticatorTest {
+class JwtCredentialsAuthenticatorTest {
     private static final String VALID_TOKEN = "eyJhbGciOiJIUzI1NiJ9.eyJ1c2VybmFtZSI6InVzZXJuYW1lIn0.Lz32Q7FAltMuGgSo1GNHFKMeCP_KBSBIohDELWHJ8xM";
 
     @Autowired
-    private AccessTokenAuthenticator accessTokenAuthenticator;
+    private JwtCredentialsAuthenticator jwtCredentialsAuthenticator;
 
     @Nested
     @DisplayName("authenticate 메서드는")
@@ -40,7 +40,7 @@ class AccessTokenAuthenticatorTest {
             @DisplayName("에러가 발생하지 않는다.")
             void it_does_not_throw() {
                 assertThatCode(() -> {
-                    accessTokenAuthenticator.authenticate(validAccessToken);
+                    jwtCredentialsAuthenticator.authenticate(validAccessToken);
                 }).doesNotThrowAnyException();
             }
         }
@@ -59,12 +59,12 @@ class AccessTokenAuthenticatorTest {
             }
 
             @Test
-            @DisplayName("에러를 던진다")
-            void it_throws_InvalidAccessTokenException() {
+            @DisplayName("EmptyJwtCredentialsException 에러를 던진다")
+            void it_throws_EmptyJwtCredentialsException() {
                 for (String emptyAccessToken : emptyAccessTokens) {
                     assertThatThrownBy(() -> {
-                        accessTokenAuthenticator.authenticate(emptyAccessToken);
-                    }).isInstanceOf(EmptyAccessTokenException.class);
+                        jwtCredentialsAuthenticator.authenticate(emptyAccessToken);
+                    }).isInstanceOf(EmptyJwtCredentialsException.class);
                 }
             }
         }
@@ -87,7 +87,7 @@ class AccessTokenAuthenticatorTest {
             void it_throw_SignatureException() {
                 for (String invalidAccessToken : invalidAccessTokens) {
                     assertThatThrownBy(() -> {
-                        accessTokenAuthenticator.authenticate(invalidAccessToken);
+                        jwtCredentialsAuthenticator.authenticate(invalidAccessToken);
                     }).isInstanceOf(SignatureException.class);
                 }
             }
