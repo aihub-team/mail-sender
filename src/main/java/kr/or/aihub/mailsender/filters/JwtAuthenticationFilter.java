@@ -31,9 +31,9 @@ public class JwtAuthenticationFilter extends BasicAuthenticationFilter {
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain) throws IOException, ServletException {
         String authorizationHttpRequestHeader = getAuthorizationRequestHeader(request)
                 .orElseThrow(EmptyJwtCredentialException::new);
-        String jwtCredentials = getJwtCredentials(authorizationHttpRequestHeader);
+        String jwtCredential = getJwtCredential(authorizationHttpRequestHeader);
 
-        jwtCredentialAuthenticator.authenticate(jwtCredentials);
+        jwtCredentialAuthenticator.authenticate(jwtCredential);
 
         SecurityContext securityContext = SecurityContextHolder.getContext();
         securityContext.setAuthentication(new UserAuthentication());
@@ -48,13 +48,13 @@ public class JwtAuthenticationFilter extends BasicAuthenticationFilter {
     }
 
     /**
-     * Authorization 헤더를 통해 얻은 Jwt Credentials를 리턴합니다.
+     * Authorization 헤더를 통해 얻은 Jwt Credential를 리턴합니다.
      *
      * @param authorizationHeader Authorization 헤더 값
-     * @return Jwt Credentials
+     * @return Jwt Credential
      * @throws NotAllowedJwtTypeException 허용되지 않은 Jwt 타입일 경우
      */
-    private String getJwtCredentials(String authorizationHeader) {
+    private String getJwtCredential(String authorizationHeader) {
         String allowedJwtType = "Bearer ";
         if (!authorizationHeader.startsWith(allowedJwtType)) {
             throw new NotAllowedJwtTypeException();

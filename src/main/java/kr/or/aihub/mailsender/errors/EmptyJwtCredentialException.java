@@ -1,7 +1,7 @@
 package kr.or.aihub.mailsender.errors;
 
 /**
- * Jwt Credentials가 비어있을 때 던집니다.
+ * Jwt Credential이 비어있을 때 던집니다.
  */
 public class EmptyJwtCredentialException extends RuntimeException {
     public EmptyJwtCredentialException() {

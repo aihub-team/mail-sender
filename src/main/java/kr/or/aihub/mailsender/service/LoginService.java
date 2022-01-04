@@ -15,10 +15,10 @@ public class LoginService {
     }
 
     /**
-     * 로그인 수행 후 Jwt Credentials를 리턴합니다.
+     * 로그인 수행 후 Jwt Credential를 리턴합니다.
      *
      * @param username 클레임에 포함될 유저이름
-     * @return 클레임을 포함한 Jwt Credentials
+     * @return 클레임을 포함한 Jwt Credential
      */
     @Transactional
     public String login(String username) {
