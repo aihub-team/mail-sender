@@ -19,7 +19,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @SpringBootTest
 @AutoConfigureMockMvc
 class IndexControllerTest {
-    private static final String VALID_TOKEN = "eyJhbGciOiJIUzI1NiJ9.eyJ1c2VybmFtZSI6InVzZXJuYW1lIn0.Lz32Q7FAltMuGgSo1GNHFKMeCP_KBSBIohDELWHJ8xM";
+    private static final String VALID_JWT_CREDENTIAL = "eyJhbGciOiJIUzI1NiJ9.eyJ1c2VybmFtZSI6InVzZXJuYW1lIn0.Lz32Q7FAltMuGgSo1GNHFKMeCP_KBSBIohDELWHJ8xM";
 
     @Autowired
     private MockMvc mockMvc;
@@ -29,15 +29,15 @@ class IndexControllerTest {
     class Describe_getIndexRequest {
 
         @Nested
-        @DisplayName("올바른 액세스 토큰이 주어지면")
-        class Context_validAccessToken {
+        @DisplayName("올바른 Jwt 자격 증명이 주어지면")
+        class Context_validJwtCredential {
 
             @Test
             @DisplayName("201을 응답한다")
-            void it_returns_201() throws Exception {
+            void it_response_201() throws Exception {
                 ResultActions actions = mockMvc.perform(
                         MockMvcRequestBuilders.get("/")
-                                .header("Authorization", "Bearer " + VALID_TOKEN)
+                                .header("Authorization", "Bearer " + VALID_JWT_CREDENTIAL)
                 );
 
                 actions
@@ -46,22 +46,22 @@ class IndexControllerTest {
         }
 
         @Nested
-        @DisplayName("올바르지 않은 액세스 토큰이 주어지면")
-        class Context_invalidAccessToken {
-            private List<String> invalidAccessTokens;
+        @DisplayName("올바르지 않은 Jwt 자격 증명이 주어지면")
+        class Context_inValidJwtCredential {
+            private List<String> inValidJwtCredentials;
 
             @BeforeEach
             void setUp() {
-                invalidAccessTokens = Arrays.asList(
-                        VALID_TOKEN + "x",
-                        VALID_TOKEN.substring(0, VALID_TOKEN.length() - 1)
+                inValidJwtCredentials = Arrays.asList(
+                        VALID_JWT_CREDENTIAL + "x",
+                        VALID_JWT_CREDENTIAL.substring(0, VALID_JWT_CREDENTIAL.length() - 1)
                 );
             }
 
             @Test
             @DisplayName("401을 응답한다")
             void it_response_401() throws Exception {
-                for (String invalidAccessToken : invalidAccessTokens) {
+                for (String invalidAccessToken : inValidJwtCredentials) {
                     ResultActions actions = mockMvc.perform(
                             MockMvcRequestBuilders.get("/")
                                     .header("Authorization", "Bearer " + invalidAccessToken)
@@ -74,13 +74,13 @@ class IndexControllerTest {
         }
 
         @Nested
-        @DisplayName("토큰이 주어지지 않는다면")
-        class Context_emptyAccessToken {
-            private List<String> emptyAccessTokens;
+        @DisplayName("Jwt 자격 증명이 주어지지 않는다면")
+        class Context_emptyJwtCredential {
+            private List<String> emptyJwtCredentials;
 
             @BeforeEach
             void setUp() {
-                emptyAccessTokens = Arrays.asList(
+                emptyJwtCredentials = Arrays.asList(
                         "",
                         " "
                 );
@@ -89,10 +89,10 @@ class IndexControllerTest {
             @Test
             @DisplayName("400을 응답한다")
             void it_response_400() throws Exception {
-                for (String emptyAccessToken : emptyAccessTokens) {
+                for (String emptyJwtCredential : emptyJwtCredentials) {
                     ResultActions actions = mockMvc.perform(
                             MockMvcRequestBuilders.get("/")
-                                    .header("Authorization", "Bearer " + emptyAccessToken)
+                                    .header("Authorization", "Bearer " + emptyJwtCredential)
                     );
 
                     actions
@@ -116,7 +116,7 @@ class IndexControllerTest {
             void it_response_400() throws Exception {
                 ResultActions actions = mockMvc.perform(
                         MockMvcRequestBuilders.get("/")
-                                .header("Authorization", notAllowedJwtType + VALID_TOKEN)
+                                .header("Authorization", notAllowedJwtType + VALID_JWT_CREDENTIAL)
                 );
 
                 actions
