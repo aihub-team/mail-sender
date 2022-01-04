@@ -24,7 +24,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @SpringBootTest
 @AutoConfigureMockMvc
 class SessionControllerTest {
-    private static final String TOKEN_REGEX = "^[A-Za-z0-9-_=]+\\.[A-Za-z0-9-_=]+\\.?[A-Za-z0-9-_.+/=]*$";
+    private static final String JWT_CREDENTIAL_REGEX = "^[A-Za-z0-9-_=]+\\.[A-Za-z0-9-_=]+\\.?[A-Za-z0-9-_.+/=]*$";
 
     @Autowired
     private MockMvc mockMvc;
@@ -65,7 +65,7 @@ class SessionControllerTest {
 
                 actions
                         .andExpect(status().isCreated())
-                        .andExpect(jsonPath("$.accessToken").value(matchesRegex(TOKEN_REGEX)));
+                        .andExpect(jsonPath("$.jwtCredential").value(matchesRegex(JWT_CREDENTIAL_REGEX)));
             }
         }
 

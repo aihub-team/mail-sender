@@ -37,10 +37,10 @@ public class SessionController {
     ) {
         String username = sessionCreateRequestData.getUsername();
 
-        String accessToken = loginService.login(username);
+        String jwtCredential = loginService.login(username);
 
         return SessionCreateResponseData.builder()
-                .accessToken(accessToken)
+                .jwtCredential(jwtCredential)
                 .build();
     }
 }

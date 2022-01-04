@@ -5,10 +5,10 @@ import lombok.Getter;
 
 @Getter
 public class SessionCreateResponseData {
-    private String accessToken;
+    private String jwtCredential;
 
     @Builder
-    public SessionCreateResponseData(String accessToken) {
-        this.accessToken = accessToken;
+    public SessionCreateResponseData(String jwtCredential) {
+        this.jwtCredential = jwtCredential;
     }
 }

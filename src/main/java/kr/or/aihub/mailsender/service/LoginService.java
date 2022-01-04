@@ -22,8 +22,8 @@ public class LoginService {
      */
     @Transactional
     public String login(String username) {
-        String accessToken = jwtCredentialEncoder.encode(username);
+        String jwtCredential = jwtCredentialEncoder.encode(username);
 
-        return accessToken;
+        return jwtCredential;
     }
 }
