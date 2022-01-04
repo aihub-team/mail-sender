@@ -8,21 +8,21 @@ import org.springframework.stereotype.Component;
 import java.security.Key;
 
 /**
- * JWT 암호화 담당.
+ * Jwt Credentials 암호화 담당.
  */
 @Component
-public class JwtEncoder {
+public class JwtCredentialsEncoder {
     private Key key;
 
-    public JwtEncoder(@Value("${jwt.secret}") String secret) {
+    public JwtCredentialsEncoder(@Value("${jwt.secret}") String secret) {
         key = Keys.hmacShaKeyFor(secret.getBytes());
     }
 
     /**
-     * 암호화된 JWT를 리턴합니다.
+     * 암호화된 Jwt Credentials를 리턴합니다.
      *
      * @param username 클레임에 포함될 유저 이름
-     * @return 암호화된 JWT
+     * @return 암호화된 Jwt Credentials
      */
     public String encode(String username) {
         return Jwts.builder()

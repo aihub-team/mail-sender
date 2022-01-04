@@ -8,21 +8,21 @@ import org.springframework.transaction.annotation.Transactional;
  */
 @Service
 public class LoginService {
-    private JwtEncoder jwtEncoder;
+    private JwtCredentialsEncoder jwtCredentialsEncoder;
 
-    public LoginService(JwtEncoder jwtEncoder) {
-        this.jwtEncoder = jwtEncoder;
+    public LoginService(JwtCredentialsEncoder jwtCredentialsEncoder) {
+        this.jwtCredentialsEncoder = jwtCredentialsEncoder;
     }
 
     /**
-     * 클레임을 포함한 액세스 토큰을 리턴합니다.
+     * 로그인 수행 후 Jwt Credentials를 리턴합니다.
      *
      * @param username 클레임에 포함될 유저이름
-     * @return 클레임을 포함한 액세스 토큰
+     * @return 클레임을 포함한 Jwt Credentials
      */
     @Transactional
     public String login(String username) {
-        String accessToken = jwtEncoder.encode(username);
+        String accessToken = jwtCredentialsEncoder.encode(username);
 
         return accessToken;
     }

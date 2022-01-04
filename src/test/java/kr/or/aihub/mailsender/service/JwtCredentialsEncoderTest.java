@@ -8,18 +8,18 @@ import org.springframework.boot.test.context.SpringBootTest;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest
-class LoginServiceTest {
+class JwtCredentialsEncoderTest {
     private static final String JWT_CREDENTIALS_REGEX = "^[A-Za-z0-9-_=]+\\.[A-Za-z0-9-_=]+\\.?[A-Za-z0-9-_.+/=]*$";
 
     @Autowired
-    private LoginService loginService;
+    private JwtCredentialsEncoder jwtCredentialsEncoder;
 
     @Test
-    @DisplayName("login메서드는 username이 주어지면 로그인 요청 수행 후 Jwt Credentials를 리턴한다")
-    void login() {
+    @DisplayName("encode 메서드는 암호화된 Jwt Credentials를 리턴한다")
+    void encode() {
         String username = "username";
 
-        String accessToken = loginService.login(username);
+        String accessToken = jwtCredentialsEncoder.encode(username);
 
         assertThat(accessToken).matches(JWT_CREDENTIALS_REGEX);
     }
