@@ -100,5 +100,28 @@ class IndexControllerTest {
                 }
             }
         }
+
+        @Nested
+        @DisplayName("Authorization 헤더가 올바르지 않은 타입이라면")
+        class Context_AuthorizationHeaderStartsInValidType {
+            private String inValidAuthorizationHeaderType;
+
+            @BeforeEach
+            void setUp() {
+                inValidAuthorizationHeaderType = "ABCDEF ";
+            }
+
+            @Test
+            @DisplayName("400을 응답한다")
+            void it_response_400() throws Exception {
+                ResultActions actions = mockMvc.perform(
+                        MockMvcRequestBuilders.get("/")
+                                .header("Authorization", inValidAuthorizationHeaderType + VALID_TOKEN)
+                );
+
+                actions
+                        .andExpect(status().isBadRequest());
+            }
+        }
     }
 }
