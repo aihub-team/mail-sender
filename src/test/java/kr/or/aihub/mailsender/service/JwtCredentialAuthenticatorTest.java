@@ -84,7 +84,7 @@ class JwtCredentialAuthenticatorTest {
 
             @Test
             @DisplayName("SignatureException 에러를 던진다")
-            void it_throw_SignatureException() {
+            void it_throws_SignatureException() {
                 for (String invalidJwtCredential : invalidJwtCredentials) {
                     assertThatThrownBy(() -> {
                         jwtCredentialAuthenticator.authenticate(invalidJwtCredential);
