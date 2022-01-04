@@ -48,15 +48,13 @@ class IndexControllerTest {
         @Nested
         @DisplayName("올바르지 않은 액세스 토큰이 주어지면")
         class Context_invalidAccessToken {
-            List<String> invalidAccessTokens;
+            private List<String> invalidAccessTokens;
 
             @BeforeEach
             void setUp() {
                 invalidAccessTokens = Arrays.asList(
                         VALID_TOKEN + "x",
-                        VALID_TOKEN.substring(0, VALID_TOKEN.length() - 1),
-                        null,
-                        ""
+                        VALID_TOKEN.substring(0, VALID_TOKEN.length() - 1)
                 );
             }
 
@@ -77,17 +75,29 @@ class IndexControllerTest {
 
         @Nested
         @DisplayName("토큰이 주어지지 않는다면")
-        class Context_noAccessToken {
+        class Context_emptyAccessToken {
+            private List<String> emptyAccessTokens;
+
+            @BeforeEach
+            void setUp() {
+                emptyAccessTokens = Arrays.asList(
+                        "",
+                        " "
+                );
+            }
 
             @Test
             @DisplayName("400을 응답한다")
             void it_response_400() throws Exception {
-                ResultActions actions = mockMvc.perform(
-                        MockMvcRequestBuilders.get("/")
-                );
+                for (String emptyAccessToken : emptyAccessTokens) {
+                    ResultActions actions = mockMvc.perform(
+                            MockMvcRequestBuilders.get("/")
+                                    .header("Authorization", "Bearer " + emptyAccessToken)
+                    );
 
-                actions
-                        .andExpect(status().isBadRequest());
+                    actions
+                            .andExpect(status().isBadRequest());
+                }
             }
         }
     }

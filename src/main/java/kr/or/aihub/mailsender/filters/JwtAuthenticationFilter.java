@@ -1,7 +1,7 @@
 package kr.or.aihub.mailsender.filters;
 
 import kr.or.aihub.mailsender.auth.UserAuthentication;
-import kr.or.aihub.mailsender.errors.NoExistAccessTokenException;
+import kr.or.aihub.mailsender.errors.EmptyAccessTokenException;
 import kr.or.aihub.mailsender.service.AccessTokenAuthenticator;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.core.context.SecurityContext;
@@ -28,9 +28,9 @@ public class JwtAuthenticationFilter extends BasicAuthenticationFilter {
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain) throws IOException, ServletException {
-        String authorizationRequestHeader = getAuthorizationRequestHeader(request)
-                .orElseThrow(NoExistAccessTokenException::new);
-        String accessToken = getAccessToken(authorizationRequestHeader);
+        String authorizationHttpRequestHeader = getAuthorizationRequestHeader(request)
+                .orElseThrow(EmptyAccessTokenException::new);
+        String accessToken = getAccessToken(authorizationHttpRequestHeader);
 
         accessTokenAuthenticator.authenticate(accessToken);
 
