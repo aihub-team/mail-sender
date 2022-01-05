@@ -14,18 +14,24 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
 /**
- * 필터의 에러 처리를 담당하는 필터.
+ * 필터의 예외 처리를 담당하는 필터.
  */
-public class ErrorHandleFilter extends HttpFilter {
+public class ExceptionHandleFilter extends HttpFilter {
 
     @Override
     protected void doFilter(HttpServletRequest request, HttpServletResponse response, FilterChain chain) throws IOException, ServletException {
         try {
             chain.doFilter(request, response);
-        } catch (EmptyJwtCredentialException | NotAllowedJwtTypeException e) {
-            response.sendError(HttpStatus.BAD_REQUEST.value());
+        } catch (EmptyJwtCredentialException | NotAllowedJwtTypeException exception) {
+            response.sendError(
+                    HttpStatus.BAD_REQUEST.value(),
+                    exception.getMessage()
+            );
         } catch (SignatureException | MalformedJwtException e) {
-            response.sendError(HttpStatus.UNAUTHORIZED.value());
+            response.sendError(
+                    HttpStatus.UNAUTHORIZED.value(),
+                    "인증에 실패하였습니다."
+            );
         }
     }
 }

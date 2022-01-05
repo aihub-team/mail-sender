@@ -1,6 +1,6 @@
 package kr.or.aihub.mailsender.config;
 
-import kr.or.aihub.mailsender.filters.ErrorHandleFilter;
+import kr.or.aihub.mailsender.filters.ExceptionHandleFilter;
 import kr.or.aihub.mailsender.filters.JwtAuthenticationFilter;
 import kr.or.aihub.mailsender.service.JwtCredentialAuthenticator;
 import org.springframework.context.annotation.Configuration;
@@ -21,14 +21,14 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
     @Override
     protected void configure(HttpSecurity httpSecurity) throws Exception {
-        Filter errorHandleFilter = new ErrorHandleFilter();
+        Filter exceptionHandleFilter = new ExceptionHandleFilter();
         Filter jwtAuthenticationFilter = new JwtAuthenticationFilter(authenticationManager(),
                 jwtCredentialAuthenticator);
 
         httpSecurity
                 .antMatcher("/")
                 .addFilter(jwtAuthenticationFilter)
-                .addFilterBefore(errorHandleFilter, JwtAuthenticationFilter.class)
+                .addFilterBefore(exceptionHandleFilter, JwtAuthenticationFilter.class)
                 .httpBasic().disable()
                 .cors().and()
                 .csrf().disable();
