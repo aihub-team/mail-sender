@@ -22,10 +22,16 @@ public class ErrorHandleFilter extends HttpFilter {
     protected void doFilter(HttpServletRequest request, HttpServletResponse response, FilterChain chain) throws IOException, ServletException {
         try {
             chain.doFilter(request, response);
-        } catch (EmptyJwtCredentialException | NotAllowedJwtTypeException e) {
-            response.sendError(HttpStatus.BAD_REQUEST.value());
+        } catch (EmptyJwtCredentialException | NotAllowedJwtTypeException exception) {
+            response.sendError(
+                    HttpStatus.BAD_REQUEST.value(),
+                    exception.getMessage()
+            );
         } catch (SignatureException | MalformedJwtException e) {
-            response.sendError(HttpStatus.UNAUTHORIZED.value());
+            response.sendError(
+                    HttpStatus.UNAUTHORIZED.value(),
+                    "인증에 실패하였습니다."
+            );
         }
     }
 }
