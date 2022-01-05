@@ -14,9 +14,9 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
 /**
- * 필터의 에러 처리를 담당하는 필터.
+ * 필터의 예외 처리를 담당하는 필터.
  */
-public class ErrorHandleFilter extends HttpFilter {
+public class ExceptionHandleFilter extends HttpFilter {
 
     @Override
     protected void doFilter(HttpServletRequest request, HttpServletResponse response, FilterChain chain) throws IOException, ServletException {
