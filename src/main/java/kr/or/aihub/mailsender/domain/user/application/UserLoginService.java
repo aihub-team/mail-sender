@@ -5,13 +5,13 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
- * 로그인 처리 담당.
+ * 유저 로그인 처리 담당.
  */
 @Service
-public class LoginService {
+public class UserLoginService {
     private JwtCredentialEncoder jwtCredentialEncoder;
 
-    public LoginService(JwtCredentialEncoder jwtCredentialEncoder) {
+    public UserLoginService(JwtCredentialEncoder jwtCredentialEncoder) {
         this.jwtCredentialEncoder = jwtCredentialEncoder;
     }
 

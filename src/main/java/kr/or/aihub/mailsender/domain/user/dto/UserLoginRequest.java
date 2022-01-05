@@ -7,7 +7,7 @@ import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Size;
 
 @Getter
-public class SessionCreateRequestData {
+public class UserLoginRequest {
 
     @NotBlank
     @Size(min = 2, max = 20)
@@ -17,11 +17,11 @@ public class SessionCreateRequestData {
     @Size(min = 4, max = 20)
     private String password;
 
-    public SessionCreateRequestData() {
+    public UserLoginRequest() {
     }
 
     @Builder
-    public SessionCreateRequestData(String username, String password) {
+    public UserLoginRequest(String username, String password) {
         this.username = username;
         this.password = password;
     }
