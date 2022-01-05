@@ -40,7 +40,7 @@ public class UserController {
         String jwtCredential = userLoginService.login(username);
 
         return UserLoginResponse.builder()
-                .jwtCredential(jwtCredential)
+                .accessToken(jwtCredential)
                 .build();
     }
 }

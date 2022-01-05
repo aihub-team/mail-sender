@@ -8,7 +8,7 @@ public class UserLoginResponse {
     private final String accessToken;
 
     @Builder
-    public UserLoginResponse(String jwtCredential) {
-        this.accessToken = jwtCredential;
+    public UserLoginResponse(String accessToken) {
+        this.accessToken = accessToken;
     }
 }
