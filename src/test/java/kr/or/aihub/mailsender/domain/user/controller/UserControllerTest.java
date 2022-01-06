@@ -2,6 +2,7 @@ package kr.or.aihub.mailsender.domain.user.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import kr.or.aihub.mailsender.domain.user.dto.UserLoginRequest;
+import kr.or.aihub.mailsender.domain.user.dto.UserRegisterRequest;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -12,14 +13,14 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
+import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 
 import java.util.Arrays;
 import java.util.List;
 
 import static org.hamcrest.Matchers.matchesRegex;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -100,6 +101,42 @@ class UserControllerTest {
                     actions
                             .andExpect(status().isBadRequest());
                 }
+            }
+        }
+    }
+
+    @Nested
+    @DisplayName("POST /user/register 요청은")
+    class Describe_postUserRegister {
+        private final MockHttpServletRequestBuilder requestBuilder = post("/user/register");
+
+        @Nested
+        @DisplayName("올바른 데이터가 주어진 요청일 경우")
+        class Context_validUserRegisterDataRequest {
+
+            private UserRegisterRequest validUserRegisterRequest;
+
+            @BeforeEach
+            void setUp() {
+                validUserRegisterRequest = UserRegisterRequest.builder()
+                        .username("username")
+                        .password("password")
+                        .verifyPassword("password")
+                        .build();
+            }
+
+            @Test
+            @DisplayName("302를 응답하고 로그인 페이지로 리다이렉트 된다")
+            void It_response302AndRedirectLoginPage() throws Exception {
+                ResultActions action = mockMvc.perform(
+                        requestBuilder
+                                .content(objectMapper.writeValueAsString(validUserRegisterRequest))
+                                .contentType(MediaType.APPLICATION_JSON)
+                );
+
+                action
+                        .andExpect(status().isFound())
+                        .andExpect(redirectedUrl("/user/login"));
             }
         }
     }
