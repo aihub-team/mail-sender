@@ -3,8 +3,8 @@ package kr.or.aihub.mailsender.domain.user.application;
 import kr.or.aihub.mailsender.domain.user.domain.User;
 import kr.or.aihub.mailsender.domain.user.domain.UserRepository;
 import kr.or.aihub.mailsender.domain.user.dto.UserRegisterRequest;
+import kr.or.aihub.mailsender.domain.user.error.ConfirmPasswordNotMatchException;
 import kr.or.aihub.mailsender.domain.user.error.ExistUsernameException;
-import kr.or.aihub.mailsender.domain.user.error.VerifyPasswordNotMatchException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -28,14 +28,14 @@ public class UserRegisterService {
      *
      * @param userRegisterRequest 회원가입 시 필요 데이터
      * @return 생성한 유저
-     * @throws ExistUsernameException          유저이름이 존재할 경우
-     * @throws VerifyPasswordNotMatchException 비밀번호 확인이 틀릴 경우
+     * @throws ExistUsernameException           유저이름이 존재할 경우
+     * @throws ConfirmPasswordNotMatchException 비밀번호 확인이 틀릴 경우
      */
     public User registerUser(UserRegisterRequest userRegisterRequest) {
         String password = userRegisterRequest.getPassword();
-        String verifyPassword = userRegisterRequest.getVerifyPassword();
+        String confirmPassword = userRegisterRequest.getConfirmPassword();
 
-        checkMatch(password, verifyPassword);
+        checkMatch(password, confirmPassword);
 
         String username = userRegisterRequest.getUsername();
         checkExist(username);
@@ -51,12 +51,12 @@ public class UserRegisterService {
     /**
      * 비밀번호 확인이 일치한지 검사합니다.
      *
-     * @param password       비밀번호
-     * @param verifyPassword 비밀번호 확인
+     * @param password        비밀번호
+     * @param confirmPassword 비밀번호 확인
      */
-    private void checkMatch(String password, String verifyPassword) {
-        if (!Objects.equals(password, verifyPassword)) {
-            throw new VerifyPasswordNotMatchException();
+    private void checkMatch(String password, String confirmPassword) {
+        if (!Objects.equals(password, confirmPassword)) {
+            throw new ConfirmPasswordNotMatchException();
         }
     }
 

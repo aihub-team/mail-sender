@@ -19,12 +19,12 @@ public class UserRegisterRequest {
 
     @NotBlank
     @Size(min = 4, max = 20)
-    private final String verifyPassword;
+    private final String confirmPassword;
 
     @Builder
-    public UserRegisterRequest(String username, String password, String verifyPassword) {
+    public UserRegisterRequest(String username, String password, String confirmPassword) {
         this.username = username;
         this.password = password;
-        this.verifyPassword = verifyPassword;
+        this.confirmPassword = confirmPassword;
     }
 }

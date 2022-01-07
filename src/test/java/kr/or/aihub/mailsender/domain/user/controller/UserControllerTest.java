@@ -211,7 +211,7 @@ class UserControllerTest {
                 newUsernameRegisterRequest = UserRegisterRequest.builder()
                         .username(username)
                         .password(password)
-                        .verifyPassword(password)
+                        .confirmPassword(password)
                         .build();
             }
 
@@ -246,7 +246,7 @@ class UserControllerTest {
                 existUsernameRegisterRequest = UserRegisterRequest.builder()
                         .username(username)
                         .password(password)
-                        .verifyPassword(password)
+                        .confirmPassword(password)
                         .build();
             }
 
@@ -266,18 +266,18 @@ class UserControllerTest {
 
         @Nested
         @DisplayName("비밀번호 확인이 틀릴 경우")
-        class Context_verifyPasswordNotMatch {
-            private UserRegisterRequest verifyPasswordNotMatchRegisterRequest;
+        class Context_confirmPasswordNotMatch {
+            private UserRegisterRequest confirmPasswordNotMatchRegisterRequest;
 
             @BeforeEach
             void setUp() {
                 String username = "username";
                 String password = "password";
 
-                verifyPasswordNotMatchRegisterRequest = UserRegisterRequest.builder()
+                confirmPasswordNotMatchRegisterRequest = UserRegisterRequest.builder()
                         .username(username)
                         .password(password)
-                        .verifyPassword("xxxxx")
+                        .confirmPassword("xxxxx")
                         .build();
             }
 
@@ -286,7 +286,7 @@ class UserControllerTest {
             void It_response400() throws Exception {
                 ResultActions action = mockMvc.perform(
                         requestBuilder
-                                .content(objectMapper.writeValueAsString(verifyPasswordNotMatchRegisterRequest))
+                                .content(objectMapper.writeValueAsString(confirmPasswordNotMatchRegisterRequest))
                                 .contentType(MediaType.APPLICATION_JSON)
                 );
 

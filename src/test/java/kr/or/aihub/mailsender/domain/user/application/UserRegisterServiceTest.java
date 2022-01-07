@@ -4,8 +4,8 @@ import kr.or.aihub.mailsender.domain.user.TestUserFactory;
 import kr.or.aihub.mailsender.domain.user.domain.User;
 import kr.or.aihub.mailsender.domain.user.domain.UserRepository;
 import kr.or.aihub.mailsender.domain.user.dto.UserRegisterRequest;
+import kr.or.aihub.mailsender.domain.user.error.ConfirmPasswordNotMatchException;
 import kr.or.aihub.mailsender.domain.user.error.ExistUsernameException;
-import kr.or.aihub.mailsender.domain.user.error.VerifyPasswordNotMatchException;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -52,7 +52,7 @@ public class UserRegisterServiceTest {
                 newUsernameRegisterRequest = UserRegisterRequest.builder()
                         .username(username)
                         .password(password)
-                        .verifyPassword(password)
+                        .confirmPassword(password)
                         .build();
             }
 
@@ -87,13 +87,13 @@ public class UserRegisterServiceTest {
                 existUsernameRegisterRequest = UserRegisterRequest.builder()
                         .username(username)
                         .password(password)
-                        .verifyPassword(password)
+                        .confirmPassword(password)
                         .build();
             }
 
             @Test
             @DisplayName("ExistUsernameException을 던진다")
-            void It_throwsExistUsernameException() throws Exception {
+            void It_throwsExistUsernameException() {
                 assertThatThrownBy(() -> {
                     userRegisterService.registerUser(existUsernameRegisterRequest);
                 }).isInstanceOf(ExistUsernameException.class);
@@ -102,27 +102,27 @@ public class UserRegisterServiceTest {
 
         @Nested
         @DisplayName("비밀번호 확인이 틀릴 경우")
-        class Context_verifyPasswordNotMatch {
-            private UserRegisterRequest verifyPasswordNotMatchRegisterRequest;
+        class Context_confirmPasswordNotMatch {
+            private UserRegisterRequest confirmPasswordNotMatchRegisterRequest;
 
             @BeforeEach
             void setUp() {
                 String username = "username";
                 String password = "password";
 
-                verifyPasswordNotMatchRegisterRequest = UserRegisterRequest.builder()
+                confirmPasswordNotMatchRegisterRequest = UserRegisterRequest.builder()
                         .username(username)
                         .password(password)
-                        .verifyPassword("xxxxx")
+                        .confirmPassword("xxxxx")
                         .build();
             }
 
             @Test
-            @DisplayName("VerifyPasswordNotMatchException을 던진다")
-            void It_throwsVerifyPasswordNotMatchException() {
+            @DisplayName("ConfirmPasswordNotMatchException을 던진다")
+            void It_throwsConfirmPasswordNotMatchException() {
                 assertThatThrownBy(
-                        () -> userRegisterService.registerUser(verifyPasswordNotMatchRegisterRequest)
-                ).isInstanceOf(VerifyPasswordNotMatchException.class);
+                        () -> userRegisterService.registerUser(confirmPasswordNotMatchRegisterRequest)
+                ).isInstanceOf(ConfirmPasswordNotMatchException.class);
             }
         }
     }
