@@ -4,7 +4,7 @@ import kr.or.aihub.mailsender.domain.user.TestUserFactory;
 import kr.or.aihub.mailsender.domain.user.domain.User;
 import kr.or.aihub.mailsender.domain.user.domain.UserRepository;
 import kr.or.aihub.mailsender.domain.user.dto.UserLoginRequest;
-import kr.or.aihub.mailsender.domain.user.error.NotMatchPasswordException;
+import kr.or.aihub.mailsender.domain.user.error.PasswordNotMatchException;
 import kr.or.aihub.mailsender.domain.user.error.UserNotFoundException;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -41,7 +41,7 @@ class UserLoginServiceTest {
     class Describe_login {
 
         @Nested
-        @DisplayName("존재하는 유저이름이고 패스워드가 일치할 경우")
+        @DisplayName("존재하는 유저이름이고 비밀번호가 일치할 경우")
         class Context_existUsernameAndMatchPassword {
             private UserLoginRequest existUsernameAndMatchPasswordLoginRequest;
 
@@ -96,9 +96,9 @@ class UserLoginServiceTest {
         }
 
         @Nested
-        @DisplayName("패스워드가 일치하지 않을 경우")
-        class Context_notMatchPassword {
-            private UserLoginRequest notMatchPasswordLoginRequest;
+        @DisplayName("비밀번호가 일치하지 않을 경우")
+        class Context_passwordNotMatch {
+            private UserLoginRequest passwordNotMatchLoginRequest;
 
             @BeforeEach
             void setUp() {
@@ -108,18 +108,18 @@ class UserLoginServiceTest {
 
                 userRepository.save(user);
 
-                notMatchPasswordLoginRequest = UserLoginRequest.builder()
+                passwordNotMatchLoginRequest = UserLoginRequest.builder()
                         .username(username)
                         .password("xxxxx")
                         .build();
             }
 
             @Test
-            @DisplayName("NotMatchPasswordException을 던진다")
-            void It_throwsNotMatchPasswordException() {
+            @DisplayName("PasswordNotMatchException을 던진다")
+            void It_throwsPasswordNotMatchException() {
                 assertThatThrownBy(() ->
-                        userLoginService.login(notMatchPasswordLoginRequest)
-                ).isInstanceOf(NotMatchPasswordException.class);
+                        userLoginService.login(passwordNotMatchLoginRequest)
+                ).isInstanceOf(PasswordNotMatchException.class);
             }
         }
 

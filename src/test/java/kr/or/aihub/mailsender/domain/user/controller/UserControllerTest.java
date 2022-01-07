@@ -123,8 +123,8 @@ class UserControllerTest {
 
         @Nested
         @DisplayName("비밀번호가 일치하지 않을 경우")
-        class Context_notMatchPassword {
-            private UserLoginRequest notMatchPasswordUserLoginRequest;
+        class Context_passwordNotMatch {
+            private UserLoginRequest passwordNotMatchUserLoginRequest;
 
             @BeforeEach
             void setUp() {
@@ -134,7 +134,7 @@ class UserControllerTest {
 
                 userRepository.save(user);
 
-                notMatchPasswordUserLoginRequest = UserLoginRequest.builder()
+                passwordNotMatchUserLoginRequest = UserLoginRequest.builder()
                         .username(username)
                         .password("xxxxx")
                         .build();
@@ -145,7 +145,7 @@ class UserControllerTest {
             void It_response400() throws Exception {
                 ResultActions action = mockMvc.perform(
                         requestBuilder
-                                .content(objectMapper.writeValueAsString(notMatchPasswordUserLoginRequest))
+                                .content(objectMapper.writeValueAsString(passwordNotMatchUserLoginRequest))
                                 .contentType(MediaType.APPLICATION_JSON)
                 );
 
