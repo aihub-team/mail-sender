@@ -3,6 +3,7 @@ package kr.or.aihub.mailsender.global.utils.controller;
 import kr.or.aihub.mailsender.domain.user.error.ExistUsernameException;
 import kr.or.aihub.mailsender.domain.user.error.NotMatchPasswordException;
 import kr.or.aihub.mailsender.domain.user.error.UserNotFoundException;
+import kr.or.aihub.mailsender.domain.user.error.VerifyPasswordNotMatchException;
 import kr.or.aihub.mailsender.global.utils.controller.dto.ErrorResponse;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ControllerAdvice;
@@ -39,6 +40,15 @@ public class GlobalControllerErrorAdvice {
     @ExceptionHandler(ExistUsernameException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ErrorResponse existUsernameExceptionHandler(ExistUsernameException e) {
+        return new ErrorResponse(e.getMessage());
+    }
+
+    /**
+     * 비밀번호 확인이 일치하지 않을 경우를 처리합니다.
+     */
+    @ExceptionHandler(VerifyPasswordNotMatchException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ErrorResponse verifyPasswordNotMatchExceptionHandler(VerifyPasswordNotMatchException e) {
         return new ErrorResponse(e.getMessage());
     }
 }

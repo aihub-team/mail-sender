@@ -4,6 +4,7 @@ import kr.or.aihub.mailsender.domain.user.domain.User;
 import kr.or.aihub.mailsender.domain.user.domain.UserRepository;
 import kr.or.aihub.mailsender.domain.user.dto.UserRegisterRequest;
 import kr.or.aihub.mailsender.domain.user.error.ExistUsernameException;
+import kr.or.aihub.mailsender.domain.user.error.VerifyPasswordNotMatchException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -92,5 +93,30 @@ public class UserRegisterServiceTest {
             }
         }
 
+        @Nested
+        @DisplayName("비밀번호 확인이 틀릴 경우")
+        class Context_verifyPasswordNotMatch {
+            private UserRegisterRequest verifyPasswordNotMatchRegisterRequest;
+
+            @BeforeEach
+            void setUp() {
+                String username = "username";
+                String password = "password";
+
+                verifyPasswordNotMatchRegisterRequest = UserRegisterRequest.builder()
+                        .username(username)
+                        .password(password)
+                        .verifyPassword("xxxxx")
+                        .build();
+            }
+
+            @Test
+            @DisplayName("VerifyPasswordNotMatchException을 던진다")
+            void It_throwsVerifyPasswordNotMatchException() throws Exception {
+                assertThatThrownBy(
+                        () -> userRegisterService.registerUser(verifyPasswordNotMatchRegisterRequest)
+                ).isInstanceOf(VerifyPasswordNotMatchException.class);
+            }
+        }
     }
 }

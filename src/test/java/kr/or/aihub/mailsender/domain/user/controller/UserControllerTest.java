@@ -46,8 +46,6 @@ class UserControllerTest {
     @BeforeEach
     void setUp() {
         objectMapper = new ObjectMapper();
-
-        userRepository.deleteAll();
     }
 
     @AfterEach
@@ -209,12 +207,9 @@ class UserControllerTest {
             void setUp() {
                 String username = "username";
                 String password = "password";
-                User user = TestUserFactory.create(username, password, passwordEncoder);
-
-                userRepository.save(user);
 
                 newUsernameRegisterRequest = UserRegisterRequest.builder()
-                        .username("newUsername")
+                        .username(username)
                         .password(password)
                         .verifyPassword(password)
                         .build();
@@ -261,6 +256,37 @@ class UserControllerTest {
                 ResultActions action = mockMvc.perform(
                         requestBuilder
                                 .content(objectMapper.writeValueAsString(existUsernameRegisterRequest))
+                                .contentType(MediaType.APPLICATION_JSON)
+                );
+
+                action
+                        .andExpect(status().isBadRequest());
+            }
+        }
+
+        @Nested
+        @DisplayName("비밀번호 확인이 틀릴 경우")
+        class Context_verifyPasswordNotMatch {
+            private UserRegisterRequest verifyPasswordNotMatchRegisterRequest;
+
+            @BeforeEach
+            void setUp() {
+                String username = "username";
+                String password = "password";
+
+                verifyPasswordNotMatchRegisterRequest = UserRegisterRequest.builder()
+                        .username(username)
+                        .password(password)
+                        .verifyPassword("xxxxx")
+                        .build();
+            }
+
+            @Test
+            @DisplayName("400을 응답한다")
+            void It_response400() throws Exception {
+                ResultActions action = mockMvc.perform(
+                        requestBuilder
+                                .content(objectMapper.writeValueAsString(verifyPasswordNotMatchRegisterRequest))
                                 .contentType(MediaType.APPLICATION_JSON)
                 );
 
