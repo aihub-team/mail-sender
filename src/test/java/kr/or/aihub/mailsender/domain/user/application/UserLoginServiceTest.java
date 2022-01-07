@@ -32,6 +32,18 @@ class UserLoginServiceTest {
     @Autowired
     private PasswordEncoder passwordEncoder;
 
+    @BeforeEach
+    void setUp() {
+        userRepository.deleteAll();
+
+        User user = User.builder()
+                .username(USERNAME)
+                .password(passwordEncoder.encode(PASSWORD))
+                .build();
+
+        userRepository.save(user);
+    }
+
     @Nested
     @DisplayName("login 메서드는")
     class Describe_login {
@@ -43,15 +55,6 @@ class UserLoginServiceTest {
 
             @BeforeEach
             void setUp() {
-                userRepository.deleteAll();
-
-                User user = User.builder()
-                        .username(USERNAME)
-                        .password(passwordEncoder.encode(PASSWORD))
-                        .build();
-
-                userRepository.save(user);
-
                 existUsernameAndMatchPasswordLoginRequest = UserLoginRequest.builder()
                         .username(USERNAME)
                         .password(PASSWORD)
@@ -94,19 +97,10 @@ class UserLoginServiceTest {
         @Nested
         @DisplayName("패스워드가 일치하지 않을 경우")
         class Context_notMatchPassword {
-            // TODO: 2022/01/06 에러를 던지게 구현
             private UserLoginRequest notMatchPasswordLoginRequest;
 
             @BeforeEach
             void setUp() {
-                userRepository.deleteAll();
-
-                User user = User.builder()
-                        .username(USERNAME)
-                        .password(passwordEncoder.encode(PASSWORD))
-                        .build();
-                userRepository.save(user);
-
                 notMatchPasswordLoginRequest = UserLoginRequest.builder()
                         .username(USERNAME)
                         .password(NOT_MATCH_PASSWORD)

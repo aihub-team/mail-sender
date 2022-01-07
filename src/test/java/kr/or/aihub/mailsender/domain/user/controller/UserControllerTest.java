@@ -1,6 +1,5 @@
 package kr.or.aihub.mailsender.domain.user.controller;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import kr.or.aihub.mailsender.domain.user.domain.User;
 import kr.or.aihub.mailsender.domain.user.domain.UserRepository;
@@ -29,10 +28,10 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @SpringBootTest
 @AutoConfigureMockMvc
 class UserControllerTest {
-    private static final String JWT_CREDENTIAL_REGEX = "^[A-Za-z0-9-_=]+\\.[A-Za-z0-9-_=]+\\.?[A-Za-z0-9-_.+/=]*$";
     private static final String USERNAME = "username";
     private static final String PASSWORD = "password";
-    private static final  String NOT_MATCH_PASSWORD = PASSWORD + "x";
+    private static final String NOT_MATCH_PASSWORD = PASSWORD + "x";
+    private static final String JWT_CREDENTIAL_REGEX = "^[A-Za-z0-9-_=]+\\.[A-Za-z0-9-_=]+\\.?[A-Za-z0-9-_.+/=]*$";
 
     @Autowired
     private MockMvc mockMvc;
@@ -48,6 +47,14 @@ class UserControllerTest {
     @BeforeEach
     void setUp() {
         objectMapper = new ObjectMapper();
+
+        userRepository.deleteAll();
+
+        User user = User.builder()
+                .username(USERNAME)
+                .password(passwordEncoder.encode(PASSWORD))
+                .build();
+        userRepository.save(user);
     }
 
     @Nested
@@ -62,14 +69,6 @@ class UserControllerTest {
 
             @BeforeEach
             void setUp() {
-                userRepository.deleteAll();
-
-                User user = User.builder()
-                        .username(USERNAME)
-                        .password(passwordEncoder.encode(PASSWORD))
-                        .build();
-                userRepository.save(user);
-
                 validUserLoginRequest = UserLoginRequest.builder()
                         .username(USERNAME)
                         .password(PASSWORD)
@@ -127,14 +126,6 @@ class UserControllerTest {
 
             @BeforeEach
             void setUp() {
-                userRepository.deleteAll();
-
-                User user = User.builder()
-                        .username(USERNAME)
-                        .password(passwordEncoder.encode(PASSWORD))
-                        .build();
-                userRepository.save(user);
-
                 notMatchPasswordUserLoginRequest = UserLoginRequest.builder()
                         .username(USERNAME)
                         .password(NOT_MATCH_PASSWORD)
