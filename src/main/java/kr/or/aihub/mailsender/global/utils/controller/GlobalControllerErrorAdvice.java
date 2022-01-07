@@ -1,5 +1,6 @@
 package kr.or.aihub.mailsender.global.utils.controller;
 
+import kr.or.aihub.mailsender.domain.user.error.ExistUsernameException;
 import kr.or.aihub.mailsender.domain.user.error.NotMatchPasswordException;
 import kr.or.aihub.mailsender.domain.user.error.UserNotFoundException;
 import kr.or.aihub.mailsender.global.utils.controller.dto.ErrorResponse;
@@ -29,6 +30,15 @@ public class GlobalControllerErrorAdvice {
     @ExceptionHandler(NotMatchPasswordException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ErrorResponse notMatchPasswordExceptionHandler(NotMatchPasswordException e) {
+        return new ErrorResponse(e.getMessage());
+    }
+
+    /**
+     * 존재하는 유저이름이 회원가입을 시도할 경우를 처리합니다.
+     */
+    @ExceptionHandler(ExistUsernameException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ErrorResponse existUsernameExceptionHandler(ExistUsernameException e) {
         return new ErrorResponse(e.getMessage());
     }
 }

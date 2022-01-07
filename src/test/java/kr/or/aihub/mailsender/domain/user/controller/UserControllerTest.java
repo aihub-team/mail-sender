@@ -30,6 +30,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 class UserControllerTest {
     private static final String USERNAME = "username";
     private static final String PASSWORD = "password";
+    private static final String NEW_USERNAME = "newUsername";
     private static final String NOT_MATCH_PASSWORD = PASSWORD + "x";
     private static final String JWT_CREDENTIAL_REGEX = "^[A-Za-z0-9-_=]+\\.[A-Za-z0-9-_=]+\\.?[A-Za-z0-9-_.+/=]*$";
 
@@ -187,15 +188,15 @@ class UserControllerTest {
         private final MockHttpServletRequestBuilder requestBuilder = post("/user/register");
 
         @Nested
-        @DisplayName("올바른 데이터가 주어진 요청일 경우")
-        class Context_validUserRegisterDataRequest {
+        @DisplayName("새 유저이름일 경우")
+        class Context_newUsername {
 
-            private UserRegisterRequest validUserRegisterRequest;
+            private UserRegisterRequest newUsernameRegisterRequest;
 
             @BeforeEach
             void setUp() {
-                validUserRegisterRequest = UserRegisterRequest.builder()
-                        .username(USERNAME)
+                newUsernameRegisterRequest = UserRegisterRequest.builder()
+                        .username(NEW_USERNAME)
                         .password(PASSWORD)
                         .verifyPassword(PASSWORD)
                         .build();
@@ -206,13 +207,43 @@ class UserControllerTest {
             void It_response302AndRedirectLoginPage() throws Exception {
                 ResultActions action = mockMvc.perform(
                         requestBuilder
-                                .content(objectMapper.writeValueAsString(validUserRegisterRequest))
+                                .content(objectMapper.writeValueAsString(newUsernameRegisterRequest))
                                 .contentType(MediaType.APPLICATION_JSON)
                 );
 
                 action
                         .andExpect(status().isFound())
                         .andExpect(redirectedUrl("/user/login"));
+            }
+        }
+
+        @Nested
+        @DisplayName("존재하는 유저이름일 경우")
+        class Context_existUsername {
+            private UserRegisterRequest existUsernameRegisterRequest;
+
+            @BeforeEach
+            void setUp() {
+                String existUsername = USERNAME;
+
+                existUsernameRegisterRequest = UserRegisterRequest.builder()
+                        .username(existUsername)
+                        .password(PASSWORD)
+                        .verifyPassword(PASSWORD)
+                        .build();
+            }
+
+            @Test
+            @DisplayName("400을 응답한다")
+            void It_response400() throws Exception {
+                ResultActions action = mockMvc.perform(
+                        requestBuilder
+                                .content(objectMapper.writeValueAsString(existUsernameRegisterRequest))
+                                .contentType(MediaType.APPLICATION_JSON)
+                );
+
+                action
+                        .andExpect(status().isBadRequest());
             }
         }
     }
