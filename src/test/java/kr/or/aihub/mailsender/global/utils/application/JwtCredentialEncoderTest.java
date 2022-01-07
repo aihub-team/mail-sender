@@ -1,6 +1,7 @@
 package kr.or.aihub.mailsender.global.utils.application;
 
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -14,13 +15,18 @@ class JwtCredentialEncoderTest {
     @Autowired
     private JwtCredentialEncoder jwtCredentialEncoder;
 
-    @Test
-    @DisplayName("encode 메서드는 암호화된 Jwt Credential을 리턴한다")
-    void encode() {
-        String username = "username";
+    @Nested
+    @DisplayName("encode 메서드는")
+    class Describe_encode {
 
-        String accessToken = jwtCredentialEncoder.encode(username);
+        @Test
+        @DisplayName("암호화된 Jwt 자격증명을 리턴한다")
+        void It_returnsEncodedJwtCredential() {
+            Long userId = 1L;
 
-        assertThat(accessToken).matches(JWT_CREDENTIAL_REGEX);
+            String jwtCredential = jwtCredentialEncoder.encode(userId);
+
+            assertThat(jwtCredential).matches(JWT_CREDENTIAL_REGEX);
+        }
     }
 }

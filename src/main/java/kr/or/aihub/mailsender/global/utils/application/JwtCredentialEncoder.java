@@ -12,21 +12,21 @@ import java.security.Key;
  */
 @Component
 public class JwtCredentialEncoder {
-    private Key key;
+    private final Key key;
 
     public JwtCredentialEncoder(@Value("${jwt.secret}") String secret) {
         key = Keys.hmacShaKeyFor(secret.getBytes());
     }
 
     /**
-     * 암호화된 Jwt Credential를 리턴합니다.
+     * 암호화된 Jwt 자격증명을 리턴합니다.
      *
-     * @param username 클레임에 포함될 유저 이름
-     * @return 암호화된 Jwt Credential
+     * @param userId 유저 이름
+     * @return 암호화된 Jwt 자격증명
      */
-    public String encode(String username) {
+    public String encode(Long userId) {
         return Jwts.builder()
-                .claim("username", username)
+                .claim("userId", userId)
                 .signWith(key)
                 .compact();
     }

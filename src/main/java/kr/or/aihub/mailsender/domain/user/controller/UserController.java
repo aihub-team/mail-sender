@@ -42,9 +42,7 @@ public class UserController {
     public UserLoginResponse postSession(
             @RequestBody @Valid UserLoginRequest userLoginRequest
     ) {
-        String username = userLoginRequest.getUsername();
-
-        String jwtCredential = userLoginService.login(username);
+        String jwtCredential = userLoginService.login(userLoginRequest);
 
         return UserLoginResponse.builder()
                 .accessToken(jwtCredential)
