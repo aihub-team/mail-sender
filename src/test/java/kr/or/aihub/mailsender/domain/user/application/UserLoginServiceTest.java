@@ -1,10 +1,12 @@
 package kr.or.aihub.mailsender.domain.user.application;
 
+import kr.or.aihub.mailsender.domain.user.TestUserFactory;
 import kr.or.aihub.mailsender.domain.user.domain.User;
 import kr.or.aihub.mailsender.domain.user.domain.UserRepository;
 import kr.or.aihub.mailsender.domain.user.dto.UserLoginRequest;
 import kr.or.aihub.mailsender.domain.user.error.NotMatchPasswordException;
 import kr.or.aihub.mailsender.domain.user.error.UserNotFoundException;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -18,9 +20,6 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 @SpringBootTest
 class UserLoginServiceTest {
-    private static final String USERNAME = "username";
-    private static final String PASSWORD = "password";
-    private static final String NOT_MATCH_PASSWORD = PASSWORD + "x";
     private static final String JWT_CREDENTIAL_REGEX = "^[A-Za-z0-9-_=]+\\.[A-Za-z0-9-_=]+\\.?[A-Za-z0-9-_.+/=]*$";
 
     @Autowired
@@ -32,16 +31,9 @@ class UserLoginServiceTest {
     @Autowired
     private PasswordEncoder passwordEncoder;
 
-    @BeforeEach
-    void setUp() {
+    @AfterEach
+    void cleanUp() {
         userRepository.deleteAll();
-
-        User user = User.builder()
-                .username(USERNAME)
-                .password(passwordEncoder.encode(PASSWORD))
-                .build();
-
-        userRepository.save(user);
     }
 
     @Nested
@@ -55,9 +47,15 @@ class UserLoginServiceTest {
 
             @BeforeEach
             void setUp() {
+                String username = "username";
+                String password = "password";
+                User user = TestUserFactory.create(username, password, passwordEncoder);
+
+                userRepository.save(user);
+
                 existUsernameAndMatchPasswordLoginRequest = UserLoginRequest.builder()
-                        .username(USERNAME)
-                        .password(PASSWORD)
+                        .username(username)
+                        .password(password)
                         .build();
             }
 
@@ -79,9 +77,12 @@ class UserLoginServiceTest {
             void setUp() {
                 userRepository.deleteAll();
 
+                String username = "username";
+                String password = "password";
+
                 notExistUsernameLoginRequest = UserLoginRequest.builder()
-                        .username(USERNAME)
-                        .password(PASSWORD)
+                        .username(username)
+                        .password(password)
                         .build();
             }
 
@@ -101,9 +102,15 @@ class UserLoginServiceTest {
 
             @BeforeEach
             void setUp() {
+                String username = "username";
+                String password = "password";
+                User user = TestUserFactory.create(username, password, passwordEncoder);
+
+                userRepository.save(user);
+
                 notMatchPasswordLoginRequest = UserLoginRequest.builder()
-                        .username(USERNAME)
-                        .password(NOT_MATCH_PASSWORD)
+                        .username(username)
+                        .password("xxxxx")
                         .build();
             }
 

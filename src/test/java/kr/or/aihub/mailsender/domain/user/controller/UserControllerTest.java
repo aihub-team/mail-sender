@@ -1,10 +1,12 @@
 package kr.or.aihub.mailsender.domain.user.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import kr.or.aihub.mailsender.domain.user.TestUserFactory;
 import kr.or.aihub.mailsender.domain.user.domain.User;
 import kr.or.aihub.mailsender.domain.user.domain.UserRepository;
 import kr.or.aihub.mailsender.domain.user.dto.UserLoginRequest;
 import kr.or.aihub.mailsender.domain.user.dto.UserRegisterRequest;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -28,10 +30,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @SpringBootTest
 @AutoConfigureMockMvc
 class UserControllerTest {
-    private static final String USERNAME = "username";
-    private static final String PASSWORD = "password";
-    private static final String NEW_USERNAME = "newUsername";
-    private static final String NOT_MATCH_PASSWORD = PASSWORD + "x";
     private static final String JWT_CREDENTIAL_REGEX = "^[A-Za-z0-9-_=]+\\.[A-Za-z0-9-_=]+\\.?[A-Za-z0-9-_.+/=]*$";
 
     @Autowired
@@ -50,12 +48,11 @@ class UserControllerTest {
         objectMapper = new ObjectMapper();
 
         userRepository.deleteAll();
+    }
 
-        User user = User.builder()
-                .username(USERNAME)
-                .password(passwordEncoder.encode(PASSWORD))
-                .build();
-        userRepository.save(user);
+    @AfterEach
+    void cleanUp() {
+        userRepository.deleteAll();
     }
 
     @Nested
@@ -70,9 +67,15 @@ class UserControllerTest {
 
             @BeforeEach
             void setUp() {
+                String username = "username";
+                String password = "password";
+                User user = TestUserFactory.create(username, password, passwordEncoder);
+
+                userRepository.save(user);
+
                 validUserLoginRequest = UserLoginRequest.builder()
-                        .username(USERNAME)
-                        .password(PASSWORD)
+                        .username(username)
+                        .password(password)
                         .build();
             }
 
@@ -101,8 +104,8 @@ class UserControllerTest {
                 userRepository.deleteAll();
 
                 notExistUserLoginRequestData = UserLoginRequest.builder()
-                        .username(USERNAME)
-                        .password(PASSWORD)
+                        .username("username")
+                        .password("password")
                         .build();
             }
 
@@ -127,9 +130,15 @@ class UserControllerTest {
 
             @BeforeEach
             void setUp() {
+                String username = "username";
+                String password = "password";
+                User user = TestUserFactory.create(username, password, passwordEncoder);
+
+                userRepository.save(user);
+
                 notMatchPasswordUserLoginRequest = UserLoginRequest.builder()
-                        .username(USERNAME)
-                        .password(NOT_MATCH_PASSWORD)
+                        .username(username)
+                        .password("xxxxx")
                         .build();
             }
 
@@ -154,14 +163,17 @@ class UserControllerTest {
 
             @BeforeEach
             void setUp() {
+                String username = "username";
+                String password = "password";
+
                 invalidUserLoginRequestList = Arrays.asList(
                         new UserLoginRequest(null, null),
-                        new UserLoginRequest(USERNAME, null),
-                        new UserLoginRequest(null, PASSWORD),
-                        new UserLoginRequest("1", PASSWORD),
-                        new UserLoginRequest("123456789012345678901", PASSWORD),
-                        new UserLoginRequest(USERNAME, "123"),
-                        new UserLoginRequest(USERNAME, "123456789012345678901")
+                        new UserLoginRequest(username, null),
+                        new UserLoginRequest(null, password),
+                        new UserLoginRequest("1", password),
+                        new UserLoginRequest("123456789012345678901", password),
+                        new UserLoginRequest(username, "123"),
+                        new UserLoginRequest(username, "123456789012345678901")
                 );
             }
 
@@ -195,10 +207,16 @@ class UserControllerTest {
 
             @BeforeEach
             void setUp() {
+                String username = "username";
+                String password = "password";
+                User user = TestUserFactory.create(username, password, passwordEncoder);
+
+                userRepository.save(user);
+
                 newUsernameRegisterRequest = UserRegisterRequest.builder()
-                        .username(NEW_USERNAME)
-                        .password(PASSWORD)
-                        .verifyPassword(PASSWORD)
+                        .username("newUsername")
+                        .password(password)
+                        .verifyPassword(password)
                         .build();
             }
 
@@ -224,12 +242,16 @@ class UserControllerTest {
 
             @BeforeEach
             void setUp() {
-                String existUsername = USERNAME;
+                String username = "username";
+                String password = "password";
+                User user = TestUserFactory.create(username, password, passwordEncoder);
+
+                userRepository.save(user);
 
                 existUsernameRegisterRequest = UserRegisterRequest.builder()
-                        .username(existUsername)
-                        .password(PASSWORD)
-                        .verifyPassword(PASSWORD)
+                        .username(username)
+                        .password(password)
+                        .verifyPassword(password)
                         .build();
             }
 
