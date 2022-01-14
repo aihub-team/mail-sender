@@ -41,30 +41,64 @@ class UserLoginServiceTest {
     class Describe_login {
 
         @Nested
-        @DisplayName("존재하는 유저이름이고 비밀번호가 일치할 경우")
-        class Context_existUsernameAndMatchPassword {
-            private UserLoginRequest existUsernameAndMatchPasswordLoginRequest;
+        @DisplayName("존재하는 유저이름이고")
+        class Context_existUsername {
 
-            @BeforeEach
-            void setUp() {
-                String username = "username";
-                String password = "password";
-                User user = TestUserFactory.create(username, password, passwordEncoder);
+            @Nested
+            @DisplayName("비밀번호가 일치할 경우")
+            class Context_passwordMatch {
+                private UserLoginRequest matchPasswordLoginRequest;
 
-                userRepository.save(user);
+                @BeforeEach
+                void setUp() {
+                    String username = "username";
+                    String password = "password";
+                    User user = TestUserFactory.create(username, password, passwordEncoder);
 
-                existUsernameAndMatchPasswordLoginRequest = UserLoginRequest.builder()
-                        .username(username)
-                        .password(password)
-                        .build();
+                    userRepository.save(user);
+
+                    matchPasswordLoginRequest = UserLoginRequest.builder()
+                            .username(username)
+                            .password(password)
+                            .build();
+                }
+
+                @Test
+                @DisplayName("Jwt 자격증명을 리턴한다")
+                void It_returnsJwtCredential() {
+                    String jwtCredential = userLoginService.login(matchPasswordLoginRequest);
+
+                    assertThat(jwtCredential).matches(JWT_CREDENTIAL_REGEX);
+                }
+
             }
 
-            @Test
-            @DisplayName("Jwt 자격증명을 리턴한다")
-            void It_returnsJwtCredential() {
-                String jwtCredential = userLoginService.login(existUsernameAndMatchPasswordLoginRequest);
+            @Nested
+            @DisplayName("비밀번호가 일치하지 않을 경우")
+            class Context_passwordNotMatch {
+                private UserLoginRequest passwordNotMatchLoginRequest;
 
-                assertThat(jwtCredential).matches(JWT_CREDENTIAL_REGEX);
+                @BeforeEach
+                void setUp() {
+                    String username = "username";
+                    String password = "password";
+                    User user = TestUserFactory.create(username, password, passwordEncoder);
+
+                    userRepository.save(user);
+
+                    passwordNotMatchLoginRequest = UserLoginRequest.builder()
+                            .username(username)
+                            .password("xxxxx")
+                            .build();
+                }
+
+                @Test
+                @DisplayName("PasswordNotMatchException을 던진다")
+                void It_throwsPasswordNotMatchException() {
+                    assertThatThrownBy(() ->
+                            userLoginService.login(passwordNotMatchLoginRequest)
+                    ).isInstanceOf(PasswordNotMatchException.class);
+                }
             }
         }
 
@@ -92,34 +126,6 @@ class UserLoginServiceTest {
                 assertThatThrownBy(() ->
                         userLoginService.login(notExistUsernameLoginRequest)
                 ).isInstanceOf(UserNotFoundException.class);
-            }
-        }
-
-        @Nested
-        @DisplayName("비밀번호가 일치하지 않을 경우")
-        class Context_passwordNotMatch {
-            private UserLoginRequest passwordNotMatchLoginRequest;
-
-            @BeforeEach
-            void setUp() {
-                String username = "username";
-                String password = "password";
-                User user = TestUserFactory.create(username, password, passwordEncoder);
-
-                userRepository.save(user);
-
-                passwordNotMatchLoginRequest = UserLoginRequest.builder()
-                        .username(username)
-                        .password("xxxxx")
-                        .build();
-            }
-
-            @Test
-            @DisplayName("PasswordNotMatchException을 던진다")
-            void It_throwsPasswordNotMatchException() {
-                assertThatThrownBy(() ->
-                        userLoginService.login(passwordNotMatchLoginRequest)
-                ).isInstanceOf(PasswordNotMatchException.class);
             }
         }
 
