@@ -34,7 +34,6 @@ public class UserRegisterService {
     public User registerUser(UserRegisterRequest userRegisterRequest) {
         String password = userRegisterRequest.getPassword();
         String confirmPassword = userRegisterRequest.getConfirmPassword();
-
         checkMatch(password, confirmPassword);
 
         String username = userRegisterRequest.getUsername();
@@ -53,6 +52,7 @@ public class UserRegisterService {
      *
      * @param password        비밀번호
      * @param confirmPassword 비밀번호 확인
+     * @throws ConfirmPasswordNotMatchException 비밀번호 확인이 틀릴 경우
      */
     private void checkMatch(String password, String confirmPassword) {
         if (!Objects.equals(password, confirmPassword)) {
