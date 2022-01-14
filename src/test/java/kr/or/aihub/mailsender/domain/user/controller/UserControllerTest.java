@@ -1,6 +1,9 @@
 package kr.or.aihub.mailsender.domain.user.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import kr.or.aihub.mailsender.domain.role.domain.Role;
+import kr.or.aihub.mailsender.domain.role.domain.RoleRepository;
+import kr.or.aihub.mailsender.domain.role.domain.RoleType;
 import kr.or.aihub.mailsender.domain.user.TestUserFactory;
 import kr.or.aihub.mailsender.domain.user.domain.User;
 import kr.or.aihub.mailsender.domain.user.domain.UserRepository;
@@ -41,6 +44,9 @@ class UserControllerTest {
     @Autowired
     private PasswordEncoder passwordEncoder;
 
+    @Autowired
+    private RoleRepository roleRepository;
+
     private ObjectMapper objectMapper;
 
     @BeforeEach
@@ -50,6 +56,7 @@ class UserControllerTest {
 
     @AfterEach
     void cleanUp() {
+        roleRepository.deleteAll();
         userRepository.deleteAll();
     }
 
@@ -166,38 +173,92 @@ class UserControllerTest {
                 }
 
                 @Nested
-                @DisplayName("비밀번호가 일치할 경우")
+                @DisplayName("비밀번호가 일치하고")
                 class Context_passwordMatch {
-                    private UserLoginRequest passwordMatchLoginRequest;
 
-                    @BeforeEach
-                    void setUp() {
-                        String username = "username";
-                        String password = "password";
-                        User user = TestUserFactory.create(username, password, passwordEncoder);
+                    @Nested
+                    @DisplayName("인증되지 않은 경우")
+                    class Context_deactivate {
+                        private UserLoginRequest deactivateLoginRequest;
 
-                        userRepository.save(user);
+                        @BeforeEach
+                        void setUp() {
+                            String username = "username";
+                            String password = "password";
+                            User user = TestUserFactory.create(username, password, passwordEncoder);
 
-                        passwordMatchLoginRequest = UserLoginRequest.builder()
-                                .username(username)
-                                .password(password)
-                                .build();
+                            User savedUser = userRepository.save(user);
+
+                            Role role = Role.builder()
+                                    .user(savedUser)
+                                    .type(RoleType.ROLE_DEACTIVATE)
+                                    .build();
+
+                            roleRepository.save(role);
+
+                            deactivateLoginRequest = UserLoginRequest.builder()
+                                    .username(username)
+                                    .password(password)
+                                    .build();
+                        }
+
+                        @Test
+                        @DisplayName("401을 응답한다")
+                        void it_response_401() throws Exception {
+                            ResultActions perform = mockMvc.perform(
+                                    requestBuilder
+                                            .content(objectMapper.writeValueAsString(deactivateLoginRequest))
+                                            .contentType(MediaType.APPLICATION_JSON)
+                            );
+
+                            perform
+                                    .andExpect(status().isUnauthorized());
+                        }
                     }
 
-                    @Test
-                    @DisplayName("201과 액세스 토큰을 응답한다")
-                    void it_response_201_and_return_accessToken() throws Exception {
-                        ResultActions action = mockMvc.perform(
-                                requestBuilder
-                                        .content(objectMapper.writeValueAsString(passwordMatchLoginRequest))
-                                        .contentType(MediaType.APPLICATION_JSON)
-                        );
+                    @Nested
+                    @DisplayName("인증된 경우")
+                    class Context_activate {
+                        private UserLoginRequest activateUserLoginRequest;
 
-                        action
-                                .andExpect(status().isCreated())
-                                .andExpect(jsonPath("$.accessToken").value(matchesRegex(JWT_CREDENTIAL_REGEX)));
+                        @BeforeEach
+                        void setUp() {
+                            String username = "username";
+                            String password = "password";
+                            User user = TestUserFactory.create(username, password, passwordEncoder);
+
+                            User savedUser = userRepository.save(user);
+
+                            Role role = Role.builder()
+                                    .user(savedUser)
+                                    .type(RoleType.ROLE_DEACTIVATE)
+                                    .build();
+
+                            roleRepository.save(role);
+
+                            activateUserLoginRequest = UserLoginRequest.builder()
+                                    .username(username)
+                                    .password(password)
+                                    .build();
+                        }
+
+                        @Test
+                        @DisplayName("201과 액세스 토큰을 응답한다")
+                        void it_response_201_and_return_accessToken() throws Exception {
+                            ResultActions action = mockMvc.perform(
+                                    requestBuilder
+                                            .content(objectMapper.writeValueAsString(activateUserLoginRequest))
+                                            .contentType(MediaType.APPLICATION_JSON)
+                            );
+
+                            action
+                                    .andExpect(status().isCreated())
+                                    .andExpect(jsonPath("$.accessToken").value(matchesRegex(JWT_CREDENTIAL_REGEX)));
+                        }
+
                     }
                 }
+
 
             }
 

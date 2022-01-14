@@ -6,4 +6,6 @@ import org.springframework.data.repository.CrudRepository;
 
 public interface JpaRoleRepository extends RoleRepository, CrudRepository<Role, Long> {
     Role save(Role role);
+
+    void deleteAll();
 }
