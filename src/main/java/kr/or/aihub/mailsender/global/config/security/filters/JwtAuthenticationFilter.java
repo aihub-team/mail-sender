@@ -48,8 +48,6 @@ public class JwtAuthenticationFilter extends BasicAuthenticationFilter {
                 .orElseThrow(EmptyJwtCredentialException::new);
         String jwtCredential = getJwtCredential(authorizationHttpRequestHeader);
 
-        jwtCredentialAuthenticator.authenticate(jwtCredential);
-
         Long userId = (Long) jwtCredentialAuthenticator.decode(jwtCredential, "userId");
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new UserNotFoundException(userId));

@@ -25,27 +25,18 @@ public class JwtCredentialAuthenticator {
     }
 
     /**
-     * Jwt Credential를 인증합니다.
-     *
-     * @param jwtCredential Jwt Credential
-     * @throws EmptyJwtCredentialException Jwt Credential가 존재하지 않을 경우
-     * @throws MalformedJwtException       Jwt Credential 형식이 올바르지 않을 경우
-     * @throws SignatureException          Jwt Credential 서명이 실패한 경우
-     */
-    public void authenticate(String jwtCredential) {
-        checkEmpty(jwtCredential);
-
-        checkValid(jwtCredential);
-    }
-
-    /**
      * Jwt Credential에서 복호화된 정보를 리턴합니다.
      *
      * @param jwtCredential 암호화된 Jwt Credential
      * @param key           복호화할 페이로드의 키
      * @return key 값으로 찾은 복호화된 페이로드 값
+     * @throws EmptyJwtCredentialException Jwt Credential가 존재하지 않을 경우
+     * @throws MalformedJwtException       Jwt Credential 형식이 올바르지 않을 경우
+     * @throws SignatureException          Jwt Credential 서명이 실패한 경우
      */
     public Object decode(String jwtCredential, String key) {
+        checkEmpty(jwtCredential);
+
         JwtParser jwtParser = Jwts.parserBuilder()
                 .deserializeJsonWith(new JacksonDeserializer(Maps.of(
                         "userId", Long.class
@@ -57,20 +48,6 @@ public class JwtCredentialAuthenticator {
                 .parseClaimsJws(jwtCredential)
                 .getBody()
                 .get(key);
-    }
-
-    /**
-     * 올바른지 확인합니다.
-     *
-     * @param jwtCredential Jwt Credential
-     * @throws MalformedJwtException Jwt Credential 형식이 올바르지 않을 경우
-     * @throws SignatureException    Jwt Credential 서명이 실패한 경우
-     */
-    private void checkValid(String jwtCredential) {
-        Jwts.parserBuilder()
-                .setSigningKey(key)
-                .build()
-                .parseClaimsJws(jwtCredential);
     }
 
     /**
