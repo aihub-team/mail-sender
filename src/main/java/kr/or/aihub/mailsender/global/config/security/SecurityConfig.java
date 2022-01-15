@@ -4,7 +4,7 @@ import kr.or.aihub.mailsender.domain.role.domain.RoleRepository;
 import kr.or.aihub.mailsender.domain.user.domain.UserRepository;
 import kr.or.aihub.mailsender.global.config.security.filters.ExceptionHandleFilter;
 import kr.or.aihub.mailsender.global.config.security.filters.JwtAuthenticationFilter;
-import kr.or.aihub.mailsender.global.utils.application.JwtCredentialAuthenticator;
+import kr.or.aihub.mailsender.global.utils.application.JwtCredentialDecoder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpStatus;
@@ -20,16 +20,16 @@ import javax.servlet.Filter;
 @Configuration
 @EnableGlobalMethodSecurity(securedEnabled = true, prePostEnabled = true)
 public class SecurityConfig extends WebSecurityConfigurerAdapter {
-    private final JwtCredentialAuthenticator jwtCredentialAuthenticator;
+    private final JwtCredentialDecoder jwtCredentialDecoder;
     private final UserRepository userRepository;
     private final RoleRepository roleRepository;
 
     public SecurityConfig(
-            JwtCredentialAuthenticator jwtCredentialAuthenticator,
+            JwtCredentialDecoder jwtCredentialDecoder,
             UserRepository userRepository,
             RoleRepository roleRepository
     ) {
-        this.jwtCredentialAuthenticator = jwtCredentialAuthenticator;
+        this.jwtCredentialDecoder = jwtCredentialDecoder;
         this.userRepository = userRepository;
         this.roleRepository = roleRepository;
     }
@@ -38,7 +38,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     protected void configure(HttpSecurity httpSecurity) throws Exception {
         Filter exceptionHandleFilter = new ExceptionHandleFilter();
         Filter jwtAuthenticationFilter = new JwtAuthenticationFilter(authenticationManager(),
-                jwtCredentialAuthenticator, userRepository, roleRepository);
+                jwtCredentialDecoder, userRepository, roleRepository);
 
         httpSecurity
                 .antMatcher("/")

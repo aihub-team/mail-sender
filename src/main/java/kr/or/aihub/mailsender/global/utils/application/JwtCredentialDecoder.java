@@ -14,13 +14,13 @@ import org.springframework.stereotype.Service;
 import java.security.Key;
 
 /**
- * Jwt Credential 인증 담당.
+ * Jwt Credential 복호화 담당.
  */
 @Service
-public class JwtCredentialAuthenticator {
+public class JwtCredentialDecoder {
     private final Key key;
 
-    public JwtCredentialAuthenticator(@Value("${jwt.secret}") String secret) {
+    public JwtCredentialDecoder(@Value("${jwt.secret}") String secret) {
         key = Keys.hmacShaKeyFor(secret.getBytes());
     }
 

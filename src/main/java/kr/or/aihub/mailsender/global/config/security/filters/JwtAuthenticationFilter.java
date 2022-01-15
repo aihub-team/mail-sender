@@ -8,7 +8,7 @@ import kr.or.aihub.mailsender.domain.user.error.UserNotFoundException;
 import kr.or.aihub.mailsender.global.config.security.auth.UserAuthentication;
 import kr.or.aihub.mailsender.global.config.security.error.EmptyJwtCredentialException;
 import kr.or.aihub.mailsender.global.config.security.error.NotAllowedJwtTypeException;
-import kr.or.aihub.mailsender.global.utils.application.JwtCredentialAuthenticator;
+import kr.or.aihub.mailsender.global.utils.application.JwtCredentialDecoder;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -26,18 +26,18 @@ import java.util.Optional;
  * JWT 인증을 담당하는 필터.
  */
 public class JwtAuthenticationFilter extends BasicAuthenticationFilter {
-    private final JwtCredentialAuthenticator jwtCredentialAuthenticator;
+    private final JwtCredentialDecoder jwtCredentialDecoder;
     private final UserRepository userRepository;
     private final RoleRepository roleRepository;
 
     public JwtAuthenticationFilter(
             AuthenticationManager authenticationManager,
-            JwtCredentialAuthenticator jwtCredentialAuthenticator,
+            JwtCredentialDecoder jwtCredentialDecoder,
             UserRepository userRepository,
             RoleRepository roleRepository
     ) {
         super(authenticationManager);
-        this.jwtCredentialAuthenticator = jwtCredentialAuthenticator;
+        this.jwtCredentialDecoder = jwtCredentialDecoder;
         this.userRepository = userRepository;
         this.roleRepository = roleRepository;
     }
@@ -48,7 +48,7 @@ public class JwtAuthenticationFilter extends BasicAuthenticationFilter {
                 .orElseThrow(EmptyJwtCredentialException::new);
         String jwtCredential = getJwtCredential(authorizationHttpRequestHeader);
 
-        Long userId = (Long) jwtCredentialAuthenticator.decode(jwtCredential, "userId");
+        Long userId = (Long) jwtCredentialDecoder.decode(jwtCredential, "userId");
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new UserNotFoundException(userId));
         List<Role> roles = roleRepository.findAllByUser(user);

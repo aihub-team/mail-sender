@@ -16,11 +16,11 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 @SpringBootTest
-class JwtCredentialAuthenticatorTest {
+class JwtCredentialDecoderTest {
     private static final String VALID_JWT_CREDENTIAL = "eyJhbGciOiJIUzI1NiJ9.eyJ1c2VySWQiOjF9.ZZ3CUl0jxeLGvQ1Js5nG2Ty5qGTlqai5ubDMXZOdaDk";
 
     @Autowired
-    private JwtCredentialAuthenticator jwtCredentialAuthenticator;
+    private JwtCredentialDecoder jwtCredentialDecoder;
 
     @Nested
     @DisplayName("decode 메서드는")
@@ -40,7 +40,7 @@ class JwtCredentialAuthenticatorTest {
             @Test
             @DisplayName("Long 타입의 복호화된 userId를 리턴한다")
             void It_returnsDecodedInfo() {
-                Object userId = jwtCredentialAuthenticator.decode(jwtCredential, key);
+                Object userId = jwtCredentialDecoder.decode(jwtCredential, key);
 
                 assertThat(userId).isInstanceOf(Long.class);
                 assertThat(userId).isEqualTo(1L);
@@ -65,7 +65,7 @@ class JwtCredentialAuthenticatorTest {
             void it_throws_EmptyJwtCredentialsException() {
                 for (String emptyJwtCredential : emptyJwtCredentials) {
                     assertThatThrownBy(() -> {
-                        jwtCredentialAuthenticator.decode(emptyJwtCredential, key);
+                        jwtCredentialDecoder.decode(emptyJwtCredential, key);
                     }).isInstanceOf(EmptyJwtCredentialException.class);
                 }
             }
@@ -89,7 +89,7 @@ class JwtCredentialAuthenticatorTest {
             void it_throws_SignatureException() {
                 for (String invalidJwtCredential : invalidJwtCredentials) {
                     assertThatThrownBy(() -> {
-                        jwtCredentialAuthenticator.decode(invalidJwtCredential, key);
+                        jwtCredentialDecoder.decode(invalidJwtCredential, key);
                     }).isInstanceOf(SignatureException.class);
                 }
             }
