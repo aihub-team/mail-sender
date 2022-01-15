@@ -1,5 +1,10 @@
 package kr.or.aihub.mailsender.global.config.security.filters;
 
+import kr.or.aihub.mailsender.domain.role.domain.Role;
+import kr.or.aihub.mailsender.domain.role.domain.RoleRepository;
+import kr.or.aihub.mailsender.domain.user.domain.User;
+import kr.or.aihub.mailsender.domain.user.domain.UserRepository;
+import kr.or.aihub.mailsender.domain.user.error.UserNotFoundException;
 import kr.or.aihub.mailsender.global.config.security.auth.UserAuthentication;
 import kr.or.aihub.mailsender.global.config.security.error.EmptyJwtCredentialException;
 import kr.or.aihub.mailsender.global.config.security.error.NotAllowedJwtTypeException;
@@ -14,6 +19,7 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.util.List;
 import java.util.Optional;
 
 /**
@@ -21,10 +27,19 @@ import java.util.Optional;
  */
 public class JwtAuthenticationFilter extends BasicAuthenticationFilter {
     private final JwtCredentialAuthenticator jwtCredentialAuthenticator;
+    private final UserRepository userRepository;
+    private final RoleRepository roleRepository;
 
-    public JwtAuthenticationFilter(AuthenticationManager authenticationManager, JwtCredentialAuthenticator jwtCredentialAuthenticator) {
+    public JwtAuthenticationFilter(
+            AuthenticationManager authenticationManager,
+            JwtCredentialAuthenticator jwtCredentialAuthenticator,
+            UserRepository userRepository,
+            RoleRepository roleRepository
+    ) {
         super(authenticationManager);
         this.jwtCredentialAuthenticator = jwtCredentialAuthenticator;
+        this.userRepository = userRepository;
+        this.roleRepository = roleRepository;
     }
 
     @Override
@@ -35,8 +50,13 @@ public class JwtAuthenticationFilter extends BasicAuthenticationFilter {
 
         jwtCredentialAuthenticator.authenticate(jwtCredential);
 
+        Long userId = (Long) jwtCredentialAuthenticator.decode(jwtCredential, "userId");
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new UserNotFoundException(userId));
+        List<Role> roles = roleRepository.findAllByUser(user);
+
         SecurityContext securityContext = SecurityContextHolder.getContext();
-        securityContext.setAuthentication(new UserAuthentication());
+        securityContext.setAuthentication(new UserAuthentication(userId, roles));
 
         chain.doFilter(request, response);
     }
