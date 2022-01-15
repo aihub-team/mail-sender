@@ -1,5 +1,6 @@
 package kr.or.aihub.mailsender;
 
+import kr.or.aihub.mailsender.domain.role.TestRoleFactory;
 import kr.or.aihub.mailsender.domain.role.domain.Role;
 import kr.or.aihub.mailsender.domain.role.domain.RoleRepository;
 import kr.or.aihub.mailsender.domain.role.domain.RoleType;
@@ -72,10 +73,7 @@ class IndexControllerTest {
                     User user = TestUserFactory.create(username, password, passwordEncoder);
                     userRepository.save(user);
 
-                    Role role = Role.builder()
-                            .user(user)
-                            .type(RoleType.ROLE_ACTIVATE)
-                            .build();
+                    Role role = TestRoleFactory.create(user, RoleType.ROLE_ACTIVATE);
                     roleRepository.save(role);
 
                     activateUserJwtCredential = jwtCredentialEncoder.encode(user.getId());
@@ -105,10 +103,7 @@ class IndexControllerTest {
                     User user = TestUserFactory.create("username", "password", passwordEncoder);
                     userRepository.save(user);
 
-                    Role role = Role.builder()
-                            .user(user)
-                            .type(RoleType.ROLE_DEACTIVATE)
-                            .build();
+                    Role role = TestRoleFactory.create(user, RoleType.ROLE_DEACTIVATE);
                     roleRepository.save(role);
 
                     deactivateUserJwtCredential = jwtCredentialEncoder.encode(user.getId());
