@@ -1,5 +1,8 @@
 package kr.or.aihub.mailsender.domain.user.application;
 
+import kr.or.aihub.mailsender.domain.role.domain.Role;
+import kr.or.aihub.mailsender.domain.role.domain.RoleRepository;
+import kr.or.aihub.mailsender.domain.role.domain.RoleType;
 import kr.or.aihub.mailsender.domain.user.domain.User;
 import kr.or.aihub.mailsender.domain.user.domain.UserRepository;
 import kr.or.aihub.mailsender.domain.user.dto.UserRegisterRequest;
@@ -17,10 +20,16 @@ import java.util.Objects;
 public class UserRegisterService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
+    private final RoleRepository roleRepository;
 
-    public UserRegisterService(UserRepository userRepository, PasswordEncoder passwordEncoder) {
+    public UserRegisterService(
+            UserRepository userRepository,
+            PasswordEncoder passwordEncoder,
+            RoleRepository roleRepository
+    ) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
+        this.roleRepository = roleRepository;
     }
 
     /**
@@ -43,8 +52,15 @@ public class UserRegisterService {
                 .username(username)
                 .password(passwordEncoder.encode(password))
                 .build();
+        userRepository.save(user);
 
-        return userRepository.save(user);
+        Role role = Role.builder()
+                .user(user)
+                .type(RoleType.ROLE_DEACTIVATE)
+                .build();
+        roleRepository.save(role);
+
+        return user;
     }
 
     /**
