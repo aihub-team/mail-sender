@@ -38,9 +38,7 @@ public class JwtCredentialDecoder {
         checkEmpty(jwtCredential);
 
         JwtParser jwtParser = Jwts.parserBuilder()
-                .deserializeJsonWith(new JacksonDeserializer(Maps.of(
-                        "userId", Long.class
-                ).build()))
+                .deserializeJsonWith(getDeserializer())
                 .setSigningKey(this.key)
                 .build();
 
@@ -48,6 +46,12 @@ public class JwtCredentialDecoder {
                 .parseClaimsJws(jwtCredential)
                 .getBody()
                 .get(key);
+    }
+
+    private JacksonDeserializer getDeserializer() {
+        return new JacksonDeserializer(
+                Maps.of("userId", Long.class).build()
+        );
     }
 
     /**
