@@ -177,7 +177,7 @@ class UserControllerTest {
                 class Context_passwordMatch {
 
                     @Nested
-                    @DisplayName("인증되지 않은 경우")
+                    @DisplayName("비활성화된 유저일 경우")
                     class Context_deactivate {
                         private UserLoginRequest deactivateLoginRequest;
 
@@ -187,10 +187,10 @@ class UserControllerTest {
                             String password = "password";
                             User user = TestUserFactory.create(username, password, passwordEncoder);
 
-                            User savedUser = userRepository.save(user);
+                            userRepository.save(user);
 
                             Role role = Role.builder()
-                                    .user(savedUser)
+                                    .user(user)
                                     .type(RoleType.ROLE_DEACTIVATE)
                                     .build();
 
@@ -217,7 +217,7 @@ class UserControllerTest {
                     }
 
                     @Nested
-                    @DisplayName("인증된 경우")
+                    @DisplayName("활성화된 유저일 경우")
                     class Context_activate {
                         private UserLoginRequest activateUserLoginRequest;
 
@@ -227,11 +227,11 @@ class UserControllerTest {
                             String password = "password";
                             User user = TestUserFactory.create(username, password, passwordEncoder);
 
-                            User savedUser = userRepository.save(user);
+                            userRepository.save(user);
 
                             Role role = Role.builder()
-                                    .user(savedUser)
-                                    .type(RoleType.ROLE_DEACTIVATE)
+                                    .user(user)
+                                    .type(RoleType.ROLE_ACTIVATE)
                                     .build();
 
                             roleRepository.save(role);
@@ -258,7 +258,6 @@ class UserControllerTest {
 
                     }
                 }
-
 
             }
 

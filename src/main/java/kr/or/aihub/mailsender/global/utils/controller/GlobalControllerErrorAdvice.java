@@ -1,6 +1,7 @@
 package kr.or.aihub.mailsender.global.utils.controller;
 
 import kr.or.aihub.mailsender.domain.user.error.ConfirmPasswordNotMatchException;
+import kr.or.aihub.mailsender.domain.user.error.DeactivateUserException;
 import kr.or.aihub.mailsender.domain.user.error.ExistUsernameException;
 import kr.or.aihub.mailsender.domain.user.error.PasswordNotMatchException;
 import kr.or.aihub.mailsender.domain.user.error.UserNotFoundException;
@@ -49,6 +50,15 @@ public class GlobalControllerErrorAdvice {
     @ExceptionHandler(ConfirmPasswordNotMatchException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ErrorResponse confirmPasswordNotMatchExceptionHandler(ConfirmPasswordNotMatchException e) {
+        return new ErrorResponse(e.getMessage());
+    }
+
+    /**
+     * 활성화되지 않은 유저일 경우를 처리합니다.
+     */
+    @ExceptionHandler(DeactivateUserException.class)
+    @ResponseStatus(HttpStatus.UNAUTHORIZED)
+    public ErrorResponse deactivateUserExceptionHandler(DeactivateUserException e) {
         return new ErrorResponse(e.getMessage());
     }
 }

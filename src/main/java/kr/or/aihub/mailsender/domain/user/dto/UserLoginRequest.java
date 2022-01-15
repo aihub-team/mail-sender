@@ -17,7 +17,7 @@ public class UserLoginRequest {
     @Size(min = 4, max = 20)
     private String password;
 
-    public UserLoginRequest() {
+    protected UserLoginRequest() {
     }
 
     @Builder

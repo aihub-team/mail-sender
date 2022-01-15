@@ -1,9 +1,13 @@
 package kr.or.aihub.mailsender.domain.user.application;
 
+import kr.or.aihub.mailsender.domain.role.domain.Role;
+import kr.or.aihub.mailsender.domain.role.domain.RoleRepository;
+import kr.or.aihub.mailsender.domain.role.domain.RoleType;
 import kr.or.aihub.mailsender.domain.user.TestUserFactory;
 import kr.or.aihub.mailsender.domain.user.domain.User;
 import kr.or.aihub.mailsender.domain.user.domain.UserRepository;
 import kr.or.aihub.mailsender.domain.user.dto.UserLoginRequest;
+import kr.or.aihub.mailsender.domain.user.error.DeactivateUserException;
 import kr.or.aihub.mailsender.domain.user.error.PasswordNotMatchException;
 import kr.or.aihub.mailsender.domain.user.error.UserNotFoundException;
 import org.junit.jupiter.api.AfterEach;
@@ -31,8 +35,12 @@ class UserLoginServiceTest {
     @Autowired
     private PasswordEncoder passwordEncoder;
 
+    @Autowired
+    private RoleRepository roleRepository;
+
     @AfterEach
     void cleanUp() {
+        roleRepository.deleteAll();
         userRepository.deleteAll();
     }
 
@@ -43,35 +51,6 @@ class UserLoginServiceTest {
         @Nested
         @DisplayName("존재하는 유저이름이고")
         class Context_existUsername {
-
-            @Nested
-            @DisplayName("비밀번호가 일치할 경우")
-            class Context_passwordMatch {
-                private UserLoginRequest matchPasswordLoginRequest;
-
-                @BeforeEach
-                void setUp() {
-                    String username = "username";
-                    String password = "password";
-                    User user = TestUserFactory.create(username, password, passwordEncoder);
-
-                    userRepository.save(user);
-
-                    matchPasswordLoginRequest = UserLoginRequest.builder()
-                            .username(username)
-                            .password(password)
-                            .build();
-                }
-
-                @Test
-                @DisplayName("Jwt 자격증명을 리턴한다")
-                void It_returnsJwtCredential() {
-                    String jwtCredential = userLoginService.login(matchPasswordLoginRequest);
-
-                    assertThat(jwtCredential).matches(JWT_CREDENTIAL_REGEX);
-                }
-
-            }
 
             @Nested
             @DisplayName("비밀번호가 일치하지 않을 경우")
@@ -100,6 +79,83 @@ class UserLoginServiceTest {
                     ).isInstanceOf(PasswordNotMatchException.class);
                 }
             }
+
+            @Nested
+            @DisplayName("비밀번호가 일치하고")
+            class Context_passwordMatch {
+                @Nested
+                @DisplayName("활성화 되지 않은 유저인 경우")
+                class Context_deactivateUser {
+                    private UserLoginRequest deactivateUserLoginRequest;
+
+                    @BeforeEach
+                    void setUp() {
+                        String username = "username";
+                        String password = "password";
+
+                        User user = TestUserFactory.create(username, password, passwordEncoder);
+
+                        userRepository.save(user);
+
+                        Role role = Role.builder()
+                                .user(user)
+                                .type(RoleType.ROLE_DEACTIVATE)
+                                .build();
+
+                        roleRepository.save(role);
+
+                        deactivateUserLoginRequest = UserLoginRequest.builder()
+                                .username(username)
+                                .password(password)
+                                .build();
+                    }
+
+                    @Test
+                    @DisplayName("DeActivateUserException을 던진다")
+                    void It_throwsDeActivateUserException() {
+                        assertThatThrownBy(() -> userLoginService.login(deactivateUserLoginRequest))
+                                .isInstanceOf(DeactivateUserException.class);
+                    }
+                }
+
+                @Nested
+                @DisplayName("활성화된 유저인 경우")
+                class Context_activateUser {
+
+                    private UserLoginRequest activateUserLoginRequest;
+
+                    @BeforeEach
+                    void setUp() {
+                        String username = "username";
+                        String password = "password";
+                        User user = TestUserFactory.create(username, password, passwordEncoder);
+
+                        userRepository.save(user);
+
+                        Role role = Role.builder()
+                                .user(user)
+                                .type(RoleType.ROLE_ACTIVATE)
+                                .build();
+
+                        roleRepository.save(role);
+
+                        activateUserLoginRequest = UserLoginRequest.builder()
+                                .username(username)
+                                .password(password)
+                                .build();
+                    }
+
+                    @Test
+                    @DisplayName("Jwt 자격증명을 리턴한다")
+                    void It_returnsJwtCredential() {
+                        String jwtCredential = userLoginService.login(activateUserLoginRequest);
+
+                        assertThat(jwtCredential).matches(JWT_CREDENTIAL_REGEX);
+                    }
+                }
+
+            }
+
         }
 
         @Nested
