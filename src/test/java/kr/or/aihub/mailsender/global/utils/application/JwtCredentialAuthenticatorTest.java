@@ -12,12 +12,11 @@ import org.springframework.boot.test.context.SpringBootTest;
 import java.util.Arrays;
 import java.util.List;
 
-import static org.assertj.core.api.Assertions.assertThatCode;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.assertj.core.api.Assertions.*;
 
 @SpringBootTest
 class JwtCredentialAuthenticatorTest {
-    private static final String VALID_JWT_CREDENTIAL = "eyJhbGciOiJIUzI1NiJ9.eyJ1c2VybmFtZSI6InVzZXJuYW1lIn0.Lz32Q7FAltMuGgSo1GNHFKMeCP_KBSBIohDELWHJ8xM";
+    private static final String VALID_JWT_CREDENTIAL = "eyJhbGciOiJIUzI1NiJ9.eyJ1c2VySWQiOjF9.ZZ3CUl0jxeLGvQ1Js5nG2Ty5qGTlqai5ubDMXZOdaDk";
 
     @Autowired
     private JwtCredentialAuthenticator jwtCredentialAuthenticator;
@@ -92,5 +91,33 @@ class JwtCredentialAuthenticatorTest {
                 }
             }
         }
+    }
+
+    @Nested
+    @DisplayName("decode 메서드는")
+    class Describe_decode {
+
+        @Nested
+        @DisplayName("Jwt 자격증명과 userId 키가 주어질 때")
+        class Context_withJwtCredentialAndKey {
+            private String jwtCredential;
+            private String key;
+
+            @BeforeEach
+            void setUp() {
+                this.jwtCredential = VALID_JWT_CREDENTIAL;
+                this.key = "userId";
+            }
+
+            @Test
+            @DisplayName("Long 타입의 복호화된 userId를 리턴한다")
+            void It_returnsDecodedInfo() {
+                Object userId = jwtCredentialAuthenticator.decode(jwtCredential, key);
+
+                assertThat(userId).isInstanceOf(Long.class);
+                assertThat(userId).isEqualTo(1L);
+            }
+        }
+
     }
 }
