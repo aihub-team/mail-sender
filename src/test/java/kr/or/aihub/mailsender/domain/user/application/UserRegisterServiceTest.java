@@ -76,11 +76,12 @@ public class UserRegisterServiceTest {
                 assertThat(createdUser.getPassword())
                         .isNotEqualTo(newUsernameRegisterRequest.getPassword());
 
-                // TODO: 2022/01/15 role도 검증 - deactivate 상태만 있어야 한다.
                 List<Role> createdUserRoles = roleRepository.findAllByUser(createdUser);
                 assertThat(createdUserRoles)
                         .hasSize(1);
-                assertThat(createdUserRoles.get(0).getType())
+
+                Role createdUserFirstRole = createdUserRoles.get(0);
+                assertThat(createdUserFirstRole.getType())
                         .isEqualTo(RoleType.ROLE_DEACTIVATE);
             }
 
