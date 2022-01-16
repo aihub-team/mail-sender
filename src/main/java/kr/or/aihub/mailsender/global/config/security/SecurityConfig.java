@@ -10,6 +10,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.builders.WebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -35,13 +36,24 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     }
 
     @Override
+    public void configure(WebSecurity web) {
+        web
+                .ignoring()
+                .antMatchers("/hello")
+                .antMatchers("/user/*");
+    }
+
+    @Override
     protected void configure(HttpSecurity httpSecurity) throws Exception {
         Filter exceptionHandleFilter = new ExceptionHandleFilter();
         Filter jwtAuthenticationFilter = new JwtAuthenticationFilter(authenticationManager(),
                 jwtCredentialDecoder, userRepository, roleRepository);
 
         httpSecurity
-                .antMatcher("/")
+                .authorizeRequests()
+                .antMatchers("/").hasRole("ACTIVATE")
+                .antMatchers("/role/*").hasRole("ADMIN")
+                .and()
                 .addFilter(jwtAuthenticationFilter)
                 .addFilterBefore(exceptionHandleFilter, JwtAuthenticationFilter.class)
                 .sessionManagement()

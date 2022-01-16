@@ -7,6 +7,11 @@ import org.springframework.security.crypto.password.PasswordEncoder;
  * 테스트 유저 생성 담당.
  */
 public class TestUserFactory {
+
+    public static User create(PasswordEncoder passwordEncoder) {
+        return create("username", "password", passwordEncoder);
+    }
+
     /**
      * 테스트 유저를 생성합니다.
      *

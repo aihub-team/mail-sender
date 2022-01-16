@@ -67,10 +67,7 @@ class IndexControllerTest {
 
                 @BeforeEach
                 void setUp() {
-                    String username = "username";
-                    String password = "password";
-
-                    User user = TestUserFactory.create(username, password, passwordEncoder);
+                    User user = TestUserFactory.create(passwordEncoder);
                     userRepository.save(user);
 
                     Role role = TestRoleFactory.create(user, RoleType.ROLE_ACTIVATE);
@@ -100,7 +97,7 @@ class IndexControllerTest {
 
                 @BeforeEach
                 void setUp() {
-                    User user = TestUserFactory.create("username", "password", passwordEncoder);
+                    User user = TestUserFactory.create(passwordEncoder);
                     userRepository.save(user);
 
                     Role role = TestRoleFactory.create(user, RoleType.ROLE_DEACTIVATE);
