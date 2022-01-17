@@ -42,7 +42,7 @@ public class RoleAddService {
         List<Role> userRoles = roleRepository.findAllByUser(user);
         RoleType requestRoleType = roleAddRequest.getRoleType();
 
-        checkAlreadyGrant(userRoles, requestRoleType);
+        checkAlreadyGranted(userRoles, requestRoleType);
 
         checkDeactivateUserRequestAdminRole(userRoles, requestRoleType);
 
@@ -84,9 +84,11 @@ public class RoleAddService {
      * @param roleType  추가할려는 권한
      * @throws AlreadyGrantedRoleException 이미 권한이 부여된 경우
      */
-    private void checkAlreadyGrant(List<Role> userRoles, RoleType roleType) {
+    private void checkAlreadyGranted(List<Role> userRoles, RoleType roleType) {
         boolean alreadyGrantedRole = userRoles.stream()
-                .anyMatch(role -> roleType.equals(role.getType()));
+                .map(userRole -> userRole.getType())
+                .anyMatch(type -> roleType.equals(type));
+
         if (alreadyGrantedRole) {
             throw new AlreadyGrantedRoleException();
         }
