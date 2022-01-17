@@ -2,7 +2,6 @@ package kr.or.aihub.mailsender.domain.role.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import kr.or.aihub.mailsender.domain.role.TestRoleFactory;
-import kr.or.aihub.mailsender.domain.role.domain.Role;
 import kr.or.aihub.mailsender.domain.role.domain.RoleRepository;
 import kr.or.aihub.mailsender.domain.role.domain.RoleType;
 import kr.or.aihub.mailsender.domain.role.dto.RoleAddRequest;
@@ -23,6 +22,9 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
+
+import java.util.Arrays;
+import java.util.List;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -53,6 +55,39 @@ class RoleControllerTest {
         userRepository.deleteAll();
     }
 
+    private void saveDeactivateRoles(User user) {
+        List<RoleType> roleTypes = Arrays.asList(
+                RoleType.ROLE_DEACTIVATE
+        );
+
+        saveRoles(user, roleTypes);
+    }
+
+    private void saveActivateRoles(User user) {
+        List<RoleType> roleTypes = Arrays.asList(
+                RoleType.ROLE_DEACTIVATE,
+                RoleType.ROLE_ACTIVATE
+        );
+
+        saveRoles(user, roleTypes);
+    }
+
+    private void saveAdminRoles(User user) {
+        List<RoleType> roleTypes = Arrays.asList(
+                RoleType.ROLE_DEACTIVATE,
+                RoleType.ROLE_ACTIVATE,
+                RoleType.ROLE_ADMIN
+        );
+
+        saveRoles(user, roleTypes);
+    }
+
+    private void saveRoles(User user, List<RoleType> roleTypes) {
+        roleTypes.stream()
+                .map(roleType -> TestRoleFactory.create(user, roleType))
+                .forEach(role -> roleRepository.save(role));
+    }
+
     @Nested
     @DisplayName("POST /role/add 요청은")
     class Describe_postRoleAdd {
@@ -69,8 +104,7 @@ class RoleControllerTest {
                 User user = TestUserFactory.create(passwordEncoder);
                 userRepository.save(user);
 
-                Role role = TestRoleFactory.create(user, RoleType.ROLE_ADMIN);
-                roleRepository.save(role);
+                saveAdminRoles(user);
 
                 adminUserJwtCredential = jwtCredentialEncoder.encode(user.getId());
             }
@@ -82,13 +116,12 @@ class RoleControllerTest {
 
                 @BeforeEach
                 void setUp() {
-                    User deactivateUser = TestUserFactory.create(passwordEncoder);
-                    userRepository.save(deactivateUser);
+                    User user = TestUserFactory.create(passwordEncoder);
+                    userRepository.save(user);
 
-                    Role role = TestRoleFactory.create(deactivateUser, RoleType.ROLE_DEACTIVATE);
-                    roleRepository.save(role);
+                    saveDeactivateRoles(user);
 
-                    this.deactivateUser = deactivateUser;
+                    this.deactivateUser = user;
                 }
 
 
@@ -184,8 +217,7 @@ class RoleControllerTest {
                     User user = TestUserFactory.create(passwordEncoder);
                     userRepository.save(user);
 
-                    Role role = TestRoleFactory.create(user, RoleType.ROLE_ACTIVATE);
-                    roleRepository.save(role);
+                    saveActivateRoles(user);
 
                     this.activateUser = user;
                 }
@@ -282,8 +314,7 @@ class RoleControllerTest {
                     User user = TestUserFactory.create(passwordEncoder);
                     userRepository.save(user);
 
-                    Role role = TestRoleFactory.create(user, RoleType.ROLE_ADMIN);
-                    roleRepository.save(role);
+                    saveAdminRoles(user);
 
                     this.adminUser = user;
                 }
@@ -381,10 +412,7 @@ class RoleControllerTest {
                 User user = TestUserFactory.create(passwordEncoder);
                 userRepository.save(user);
 
-                Role deactivateRole = TestRoleFactory.create(user, RoleType.ROLE_DEACTIVATE);
-                Role activateRole = TestRoleFactory.create(user, RoleType.ROLE_ACTIVATE);
-                roleRepository.save(deactivateRole);
-                roleRepository.save(activateRole);
+                saveActivateRoles(user);
 
                 this.notAdminUserJwtCredential = jwtCredentialEncoder.encode(user.getId());
             }
@@ -396,13 +424,12 @@ class RoleControllerTest {
 
                 @BeforeEach
                 void setUp() {
-                    User deactivateUser = TestUserFactory.create(passwordEncoder);
-                    userRepository.save(deactivateUser);
+                    User user = TestUserFactory.create(passwordEncoder);
+                    userRepository.save(user);
 
-                    Role role = TestRoleFactory.create(deactivateUser, RoleType.ROLE_DEACTIVATE);
-                    roleRepository.save(role);
+                    saveDeactivateRoles(user);
 
-                    this.deactivateUser = deactivateUser;
+                    this.deactivateUser = user;
                 }
 
                 @Nested
@@ -496,13 +523,12 @@ class RoleControllerTest {
 
                 @BeforeEach
                 void setUp() {
-                    User activateUser = TestUserFactory.create(passwordEncoder);
-                    userRepository.save(activateUser);
+                    User user = TestUserFactory.create(passwordEncoder);
+                    userRepository.save(user);
 
-                    Role role = TestRoleFactory.create(activateUser, RoleType.ROLE_ACTIVATE);
-                    roleRepository.save(role);
+                    saveActivateRoles(user);
 
-                    this.activateUser = activateUser;
+                    this.activateUser = user;
                 }
 
                 @Nested
@@ -561,7 +587,6 @@ class RoleControllerTest {
                     }
                 }
 
-
                 @Nested
                 @DisplayName("비활성화 권한 추가 요청이면")
                 class Context_deactivateRoleAddRequest {
@@ -599,13 +624,12 @@ class RoleControllerTest {
 
                 @BeforeEach
                 void setUp() {
-                    User adminUser = TestUserFactory.create(passwordEncoder);
-                    userRepository.save(adminUser);
+                    User user = TestUserFactory.create(passwordEncoder);
+                    userRepository.save(user);
 
-                    Role role = TestRoleFactory.create(adminUser, RoleType.ROLE_ADMIN);
-                    roleRepository.save(role);
+                    saveAdminRoles(user);
 
-                    this.adminUser = adminUser;
+                    this.adminUser = user;
                 }
 
                 @Nested

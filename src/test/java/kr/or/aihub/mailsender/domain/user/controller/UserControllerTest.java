@@ -199,8 +199,8 @@ class UserControllerTest {
                         }
 
                         @Test
-                        @DisplayName("401을 응답한다")
-                        void it_response_401() throws Exception {
+                        @DisplayName("400을 응답한다")
+                        void it_response_400() throws Exception {
                             ResultActions perform = mockMvc.perform(
                                     requestBuilder
                                             .content(objectMapper.writeValueAsString(deactivateLoginRequest))
@@ -208,7 +208,7 @@ class UserControllerTest {
                             );
 
                             perform
-                                    .andExpect(status().isUnauthorized());
+                                    .andExpect(status().isBadRequest());
                         }
                     }
 
