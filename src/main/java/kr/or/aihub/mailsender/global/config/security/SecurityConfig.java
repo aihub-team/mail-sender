@@ -40,7 +40,8 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
         web
                 .ignoring()
                 .antMatchers("/hello")
-                .antMatchers("/user/*");
+                .antMatchers("/user/*")
+                .antMatchers("/h2-console/**");
     }
 
     @Override
