@@ -67,14 +67,19 @@ public class RoleAddService {
      * @throws DeactivateUserException 비활성화된 유저가 어드민 권한을 요청한 경우
      */
     private void checkDeactivateUserRequestAdminRole(List<Role> userRoles, RoleType requestRoleType) {
-        boolean isActivateUser = userRoles.stream()
-                .map(userRole -> userRole.getType())
-                .anyMatch(type -> RoleType.ROLE_ACTIVATE.equals(type));
-        boolean adminRoleAddRequest = RoleType.ROLE_ADMIN.equals(requestRoleType);
-
-        if (!isActivateUser && adminRoleAddRequest) {
+        if (!isActivateUser(userRoles) && isAdminRoleType(requestRoleType)) {
             throw new DeactivateUserException();
         }
+    }
+
+    private boolean isAdminRoleType(RoleType requestRoleType) {
+        return RoleType.ROLE_ADMIN.equals(requestRoleType);
+    }
+
+    private boolean isActivateUser(List<Role> userRoles) {
+        return userRoles.stream()
+                .map(userRole -> userRole.getType())
+                .anyMatch(type -> RoleType.ROLE_ACTIVATE.equals(type));
     }
 
     /**
