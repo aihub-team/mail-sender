@@ -156,6 +156,7 @@ class UserLoginServiceTest {
 
             @BeforeEach
             void setUp() {
+                roleRepository.deleteAll();
                 userRepository.deleteAll();
 
                 String username = "username";
