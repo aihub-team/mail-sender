@@ -1,5 +1,14 @@
 package kr.or.aihub.mailsender;
 
+import kr.or.aihub.mailsender.domain.role.TestRoleFactory;
+import kr.or.aihub.mailsender.domain.role.domain.Role;
+import kr.or.aihub.mailsender.domain.role.domain.RoleRepository;
+import kr.or.aihub.mailsender.domain.role.domain.RoleType;
+import kr.or.aihub.mailsender.domain.user.TestUserFactory;
+import kr.or.aihub.mailsender.domain.user.domain.User;
+import kr.or.aihub.mailsender.domain.user.domain.UserRepository;
+import kr.or.aihub.mailsender.global.utils.application.JwtCredentialEncoder;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -7,22 +16,41 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
-import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
 import java.util.Arrays;
 import java.util.List;
 
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @SpringBootTest
 @AutoConfigureMockMvc
 class IndexControllerTest {
-    private static final String VALID_JWT_CREDENTIAL = "eyJhbGciOiJIUzI1NiJ9.eyJ1c2VybmFtZSI6InVzZXJuYW1lIn0.Lz32Q7FAltMuGgSo1GNHFKMeCP_KBSBIohDELWHJ8xM";
+    private static final String VALID_JWT_CREDENTIAL = "eyJhbGciOiJIUzI1NiJ9.eyJ1c2VySWQiOiIxIn0.0_CoL6BQVE07Y5M5kcGdmy8Mp6FTcNZdNfgo6hEsxdU";
 
     @Autowired
     private MockMvc mockMvc;
+
+    @Autowired
+    private RoleRepository roleRepository;
+
+    @Autowired
+    private UserRepository userRepository;
+
+    @Autowired
+    private PasswordEncoder passwordEncoder;
+
+    @Autowired
+    private JwtCredentialEncoder jwtCredentialEncoder;
+
+    @AfterEach
+    void cleanUp() {
+        roleRepository.deleteAll();
+        userRepository.deleteAll();
+    }
 
     @Nested
     @DisplayName("GET / 요청은")
@@ -32,17 +60,65 @@ class IndexControllerTest {
         @DisplayName("올바른 Jwt 자격 증명이 주어지면")
         class Context_validJwtCredential {
 
-            @Test
-            @DisplayName("201을 응답한다")
-            void it_response_201() throws Exception {
-                ResultActions actions = mockMvc.perform(
-                        MockMvcRequestBuilders.get("/")
-                                .header("Authorization", "Bearer " + VALID_JWT_CREDENTIAL)
-                );
+            @Nested
+            @DisplayName("활성화된 유저일 경우")
+            class Context_activateUser {
+                private String activateUserJwtCredential;
 
-                actions
-                        .andExpect(status().isOk());
+                @BeforeEach
+                void setUp() {
+                    User user = TestUserFactory.create(passwordEncoder);
+                    userRepository.save(user);
+
+                    Role role = TestRoleFactory.create(user, RoleType.ROLE_ACTIVATE);
+                    roleRepository.save(role);
+
+                    activateUserJwtCredential = jwtCredentialEncoder.encode(user.getId());
+                }
+
+                @Test
+                @DisplayName("200을 응답한다")
+                void it_response_200() throws Exception {
+                    ResultActions actions = mockMvc.perform(
+                            get("/")
+                                    .header("Authorization", "Bearer " + activateUserJwtCredential)
+                    );
+
+                    actions
+                            .andExpect(status().isOk());
+                }
+
             }
+
+            @Nested
+            @DisplayName("활성화되지 않은 유저일 경우")
+            class Context_deactivateUser {
+                private String deactivateUserJwtCredential;
+
+                @BeforeEach
+                void setUp() {
+                    User user = TestUserFactory.create(passwordEncoder);
+                    userRepository.save(user);
+
+                    Role role = TestRoleFactory.create(user, RoleType.ROLE_DEACTIVATE);
+                    roleRepository.save(role);
+
+                    deactivateUserJwtCredential = jwtCredentialEncoder.encode(user.getId());
+                }
+
+                @Test
+                @DisplayName("403을 응답한다")
+                void It_response403() throws Exception {
+                    ResultActions actions = mockMvc.perform(
+                            get("/")
+                                    .header("Authorization", "Bearer " + deactivateUserJwtCredential)
+                    );
+
+                    actions
+                            .andExpect(status().isForbidden());
+                }
+            }
+
         }
 
         @Nested
@@ -63,7 +139,7 @@ class IndexControllerTest {
             void it_response_401() throws Exception {
                 for (String invalidAccessToken : inValidJwtCredentials) {
                     ResultActions actions = mockMvc.perform(
-                            MockMvcRequestBuilders.get("/")
+                            get("/")
                                     .header("Authorization", "Bearer " + invalidAccessToken)
                     );
 
@@ -91,7 +167,7 @@ class IndexControllerTest {
             void it_response_400() throws Exception {
                 for (String emptyJwtCredential : emptyJwtCredentials) {
                     ResultActions actions = mockMvc.perform(
-                            MockMvcRequestBuilders.get("/")
+                            get("/")
                                     .header("Authorization", "Bearer " + emptyJwtCredential)
                     );
 
@@ -115,7 +191,7 @@ class IndexControllerTest {
             @DisplayName("400을 응답한다")
             void it_response_400() throws Exception {
                 ResultActions actions = mockMvc.perform(
-                        MockMvcRequestBuilders.get("/")
+                        get("/")
                                 .header("Authorization", notAllowedJwtType + VALID_JWT_CREDENTIAL)
                 );
 

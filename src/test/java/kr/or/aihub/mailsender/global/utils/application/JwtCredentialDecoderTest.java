@@ -12,36 +12,38 @@ import org.springframework.boot.test.context.SpringBootTest;
 import java.util.Arrays;
 import java.util.List;
 
-import static org.assertj.core.api.Assertions.assertThatCode;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 @SpringBootTest
-class JwtCredentialAuthenticatorTest {
-    private static final String VALID_JWT_CREDENTIAL = "eyJhbGciOiJIUzI1NiJ9.eyJ1c2VybmFtZSI6InVzZXJuYW1lIn0.Lz32Q7FAltMuGgSo1GNHFKMeCP_KBSBIohDELWHJ8xM";
+class JwtCredentialDecoderTest {
+    private static final String VALID_JWT_CREDENTIAL = "eyJhbGciOiJIUzI1NiJ9.eyJ1c2VySWQiOjF9.ZZ3CUl0jxeLGvQ1Js5nG2Ty5qGTlqai5ubDMXZOdaDk";
 
     @Autowired
-    private JwtCredentialAuthenticator jwtCredentialAuthenticator;
+    private JwtCredentialDecoder jwtCredentialDecoder;
 
     @Nested
-    @DisplayName("authenticate 메서드는")
-    class Describe_authenticate {
+    @DisplayName("decode 메서드는")
+    class Describe_decode {
+        private String jwtCredential;
+        private String key;
 
         @Nested
         @DisplayName("올바른 Jwt 자격 증명이 주어질 경우")
         class Context_validToken {
-            private String validJwtCredential;
-
             @BeforeEach
             void setUp() {
-                validJwtCredential = VALID_JWT_CREDENTIAL;
+                jwtCredential = VALID_JWT_CREDENTIAL;
+                key = "userId";
             }
 
             @Test
-            @DisplayName("에러가 발생하지 않는다.")
-            void it_does_not_throw() {
-                assertThatCode(() -> {
-                    jwtCredentialAuthenticator.authenticate(validJwtCredential);
-                }).doesNotThrowAnyException();
+            @DisplayName("Long 타입의 복호화된 userId를 리턴한다")
+            void It_returnsDecodedInfo() {
+                Object userId = jwtCredentialDecoder.decode(jwtCredential, key);
+
+                assertThat(userId).isInstanceOf(Long.class);
+                assertThat(userId).isEqualTo(1L);
             }
         }
 
@@ -63,7 +65,7 @@ class JwtCredentialAuthenticatorTest {
             void it_throws_EmptyJwtCredentialsException() {
                 for (String emptyJwtCredential : emptyJwtCredentials) {
                     assertThatThrownBy(() -> {
-                        jwtCredentialAuthenticator.authenticate(emptyJwtCredential);
+                        jwtCredentialDecoder.decode(emptyJwtCredential, key);
                     }).isInstanceOf(EmptyJwtCredentialException.class);
                 }
             }
@@ -87,7 +89,7 @@ class JwtCredentialAuthenticatorTest {
             void it_throws_SignatureException() {
                 for (String invalidJwtCredential : invalidJwtCredentials) {
                     assertThatThrownBy(() -> {
-                        jwtCredentialAuthenticator.authenticate(invalidJwtCredential);
+                        jwtCredentialDecoder.decode(invalidJwtCredential, key);
                     }).isInstanceOf(SignatureException.class);
                 }
             }

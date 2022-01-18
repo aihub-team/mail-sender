@@ -1,5 +1,8 @@
 package kr.or.aihub.mailsender.domain.user.application;
 
+import kr.or.aihub.mailsender.domain.role.domain.Role;
+import kr.or.aihub.mailsender.domain.role.domain.RoleRepository;
+import kr.or.aihub.mailsender.domain.role.domain.RoleType;
 import kr.or.aihub.mailsender.domain.user.TestUserFactory;
 import kr.or.aihub.mailsender.domain.user.domain.User;
 import kr.or.aihub.mailsender.domain.user.domain.UserRepository;
@@ -15,7 +18,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
-import static org.assertj.core.api.AssertionsForClassTypes.*;
+import java.util.List;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 @SpringBootTest
 public class UserRegisterServiceTest {
@@ -28,8 +34,12 @@ public class UserRegisterServiceTest {
     @Autowired
     private PasswordEncoder passwordEncoder;
 
+    @Autowired
+    private RoleRepository roleRepository;
+
     @AfterEach
     void cleanUp() {
+        roleRepository.deleteAll();
         userRepository.deleteAll();
     }
 
@@ -59,14 +69,20 @@ public class UserRegisterServiceTest {
             @Test
             @DisplayName("생성된 유저를 리턴한다")
             void it_returns_created_user() {
-                assertThatCode(() -> {
-                    User createdUser = userRegisterService.registerUser(newUsernameRegisterRequest);
+                User createdUser = userRegisterService.registerUser(newUsernameRegisterRequest);
 
-                    assertThat(createdUser.getUsername())
-                            .isEqualTo(newUsernameRegisterRequest.getUsername());
-                    assertThat(createdUser.getPassword())
-                            .isNotEqualTo(newUsernameRegisterRequest.getPassword());
-                }).doesNotThrowAnyException();
+                assertThat(createdUser.getUsername())
+                        .isEqualTo(newUsernameRegisterRequest.getUsername());
+                assertThat(createdUser.getPassword())
+                        .isNotEqualTo(newUsernameRegisterRequest.getPassword());
+
+                List<Role> createdUserRoles = roleRepository.findAllByUser(createdUser);
+                assertThat(createdUserRoles)
+                        .hasSize(1);
+
+                Role createdUserFirstRole = createdUserRoles.get(0);
+                assertThat(createdUserFirstRole.getType())
+                        .isEqualTo(RoleType.ROLE_DEACTIVATE);
             }
 
         }

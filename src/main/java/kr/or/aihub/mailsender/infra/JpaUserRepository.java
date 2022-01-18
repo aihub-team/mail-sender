@@ -12,4 +12,6 @@ public interface JpaUserRepository extends UserRepository, CrudRepository<User, 
     void deleteAll();
 
     Optional<User> findByUsername(String username);
+
+    Optional<User> findById(Long userId);
 }

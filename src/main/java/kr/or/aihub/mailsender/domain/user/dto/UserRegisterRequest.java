@@ -11,15 +11,18 @@ public class UserRegisterRequest {
 
     @NotBlank
     @Size(min = 2, max = 20)
-    private final String username;
+    private String username;
 
     @NotBlank
     @Size(min = 4, max = 20)
-    private final String password;
+    private String password;
 
     @NotBlank
     @Size(min = 4, max = 20)
-    private final String confirmPassword;
+    private String confirmPassword;
+
+    protected UserRegisterRequest() {
+    }
 
     @Builder
     public UserRegisterRequest(String username, String password, String confirmPassword) {

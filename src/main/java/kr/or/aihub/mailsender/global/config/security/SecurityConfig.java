@@ -1,13 +1,16 @@
 package kr.or.aihub.mailsender.global.config.security;
 
+import kr.or.aihub.mailsender.domain.role.domain.RoleRepository;
+import kr.or.aihub.mailsender.domain.user.domain.UserRepository;
 import kr.or.aihub.mailsender.global.config.security.filters.ExceptionHandleFilter;
 import kr.or.aihub.mailsender.global.config.security.filters.JwtAuthenticationFilter;
-import kr.or.aihub.mailsender.global.utils.application.JwtCredentialAuthenticator;
+import kr.or.aihub.mailsender.global.utils.application.JwtCredentialDecoder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.annotation.web.builders.WebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -16,22 +19,42 @@ import org.springframework.security.web.authentication.HttpStatusEntryPoint;
 import javax.servlet.Filter;
 
 @Configuration
-@EnableWebSecurity
+@EnableGlobalMethodSecurity(securedEnabled = true, prePostEnabled = true)
 public class SecurityConfig extends WebSecurityConfigurerAdapter {
-    private final JwtCredentialAuthenticator jwtCredentialAuthenticator;
+    private final JwtCredentialDecoder jwtCredentialDecoder;
+    private final UserRepository userRepository;
+    private final RoleRepository roleRepository;
 
-    public SecurityConfig(JwtCredentialAuthenticator jwtCredentialAuthenticator) {
-        this.jwtCredentialAuthenticator = jwtCredentialAuthenticator;
+    public SecurityConfig(
+            JwtCredentialDecoder jwtCredentialDecoder,
+            UserRepository userRepository,
+            RoleRepository roleRepository
+    ) {
+        this.jwtCredentialDecoder = jwtCredentialDecoder;
+        this.userRepository = userRepository;
+        this.roleRepository = roleRepository;
+    }
+
+    @Override
+    public void configure(WebSecurity web) {
+        web
+                .ignoring()
+                .antMatchers("/hello")
+                .antMatchers("/user/*")
+                .antMatchers("/h2-console/**");
     }
 
     @Override
     protected void configure(HttpSecurity httpSecurity) throws Exception {
         Filter exceptionHandleFilter = new ExceptionHandleFilter();
         Filter jwtAuthenticationFilter = new JwtAuthenticationFilter(authenticationManager(),
-                jwtCredentialAuthenticator);
+                jwtCredentialDecoder, userRepository, roleRepository);
 
         httpSecurity
-                .antMatcher("/")
+                .authorizeRequests()
+                .antMatchers("/").hasRole("ACTIVATE")
+                .antMatchers("/role/*").hasRole("ADMIN")
+                .and()
                 .addFilter(jwtAuthenticationFilter)
                 .addFilterBefore(exceptionHandleFilter, JwtAuthenticationFilter.class)
                 .sessionManagement()

@@ -5,6 +5,10 @@ package kr.or.aihub.mailsender.domain.user.error;
  */
 public class UserNotFoundException extends RuntimeException {
     public UserNotFoundException(String username) {
-        super(String.format("존재하지 않는 유저입니다: %s", username));
+        super(String.format("존재하지 않는 유저입니다: username: %s", username));
+    }
+
+    public UserNotFoundException(Long userId) {
+        super(String.format("존재하지 않는 유저입니다. userId: %s", userId));
     }
 }

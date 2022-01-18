@@ -1,6 +1,10 @@
 package kr.or.aihub.mailsender.domain.user.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import kr.or.aihub.mailsender.domain.role.TestRoleFactory;
+import kr.or.aihub.mailsender.domain.role.domain.Role;
+import kr.or.aihub.mailsender.domain.role.domain.RoleRepository;
+import kr.or.aihub.mailsender.domain.role.domain.RoleType;
 import kr.or.aihub.mailsender.domain.user.TestUserFactory;
 import kr.or.aihub.mailsender.domain.user.domain.User;
 import kr.or.aihub.mailsender.domain.user.domain.UserRepository;
@@ -41,6 +45,9 @@ class UserControllerTest {
     @Autowired
     private PasswordEncoder passwordEncoder;
 
+    @Autowired
+    private RoleRepository roleRepository;
+
     private ObjectMapper objectMapper;
 
     @BeforeEach
@@ -50,6 +57,7 @@ class UserControllerTest {
 
     @AfterEach
     void cleanUp() {
+        roleRepository.deleteAll();
         userRepository.deleteAll();
     }
 
@@ -57,102 +65,6 @@ class UserControllerTest {
     @DisplayName("POST /user/login 요청은")
     class Describe_postUserLogin {
         private final MockHttpServletRequestBuilder requestBuilder = post("/user/login");
-
-        @Nested
-        @DisplayName("올바른 데이터가 주어질 경우")
-        class Context_validUserLoginRequest {
-            private UserLoginRequest validUserLoginRequest;
-
-            @BeforeEach
-            void setUp() {
-                String username = "username";
-                String password = "password";
-                User user = TestUserFactory.create(username, password, passwordEncoder);
-
-                userRepository.save(user);
-
-                validUserLoginRequest = UserLoginRequest.builder()
-                        .username(username)
-                        .password(password)
-                        .build();
-            }
-
-            @Test
-            @DisplayName("201과 액세스 토큰을 응답한다")
-            void it_response_201_and_return_accessToken() throws Exception {
-                ResultActions action = mockMvc.perform(
-                        requestBuilder
-                                .content(objectMapper.writeValueAsString(validUserLoginRequest))
-                                .contentType(MediaType.APPLICATION_JSON)
-                );
-
-                action
-                        .andExpect(status().isCreated())
-                        .andExpect(jsonPath("$.accessToken").value(matchesRegex(JWT_CREDENTIAL_REGEX)));
-            }
-        }
-
-        @Nested
-        @DisplayName("존재하지 않는 유저일 경우")
-        class Context_notExistUser {
-            private UserLoginRequest notExistUserLoginRequestData;
-
-            @BeforeEach
-            void setUp() {
-                userRepository.deleteAll();
-
-                notExistUserLoginRequestData = UserLoginRequest.builder()
-                        .username("username")
-                        .password("password")
-                        .build();
-            }
-
-            @Test
-            @DisplayName("400을 응답한다")
-            void it_response_400() throws Exception {
-                ResultActions action = mockMvc.perform(
-                        requestBuilder
-                                .content(objectMapper.writeValueAsString(notExistUserLoginRequestData))
-                                .contentType(MediaType.APPLICATION_JSON)
-                );
-
-                action
-                        .andExpect(status().isBadRequest());
-            }
-        }
-
-        @Nested
-        @DisplayName("비밀번호가 일치하지 않을 경우")
-        class Context_passwordNotMatch {
-            private UserLoginRequest passwordNotMatchUserLoginRequest;
-
-            @BeforeEach
-            void setUp() {
-                String username = "username";
-                String password = "password";
-                User user = TestUserFactory.create(username, password, passwordEncoder);
-
-                userRepository.save(user);
-
-                passwordNotMatchUserLoginRequest = UserLoginRequest.builder()
-                        .username(username)
-                        .password("xxxxx")
-                        .build();
-            }
-
-            @Test
-            @DisplayName("400을 응답한다")
-            void It_response400() throws Exception {
-                ResultActions action = mockMvc.perform(
-                        requestBuilder
-                                .content(objectMapper.writeValueAsString(passwordNotMatchUserLoginRequest))
-                                .contentType(MediaType.APPLICATION_JSON)
-                );
-
-                action
-                        .andExpect(status().isBadRequest());
-            }
-        }
 
         @Nested
         @DisplayName("올바르지 않은 데이터가 주어질 경우")
@@ -190,6 +102,158 @@ class UserControllerTest {
                 }
             }
         }
+
+        @Nested
+        @DisplayName("올바른 데이터가 주어질 경우")
+        class Context_validUserLoginRequest {
+
+            @Nested
+            @DisplayName("존재하지 않는 유저일 경우")
+            class Context_notExistUser {
+                private UserLoginRequest notExistUserLoginRequest;
+
+                @BeforeEach
+                void setUp() {
+                    userRepository.deleteAll();
+
+                    notExistUserLoginRequest = UserLoginRequest.builder()
+                            .username("username")
+                            .password("password")
+                            .build();
+                }
+
+                @Test
+                @DisplayName("400을 응답한다")
+                void it_response_400() throws Exception {
+                    ResultActions action = mockMvc.perform(
+                            requestBuilder
+                                    .content(objectMapper.writeValueAsString(notExistUserLoginRequest))
+                                    .contentType(MediaType.APPLICATION_JSON)
+                    );
+
+                    action
+                            .andExpect(status().isBadRequest());
+                }
+            }
+
+            @Nested
+            @DisplayName("존재하는 유저이고")
+            class Context_existUser {
+
+                @Nested
+                @DisplayName("비밀번호가 일치하지 않을 경우")
+                class Context_passwordNotMatch {
+                    private UserLoginRequest passwordNotMatchLoginRequest;
+
+                    @BeforeEach
+                    void setUp() {
+                        String username = "username";
+                        String password = "password";
+                        User user = TestUserFactory.create(username, password, passwordEncoder);
+
+                        userRepository.save(user);
+
+                        passwordNotMatchLoginRequest = UserLoginRequest.builder()
+                                .username(username)
+                                .password("xxxxx")
+                                .build();
+                    }
+
+                    @Test
+                    @DisplayName("400을 응답한다")
+                    void It_response400() throws Exception {
+                        ResultActions action = mockMvc.perform(
+                                requestBuilder
+                                        .content(objectMapper.writeValueAsString(passwordNotMatchLoginRequest))
+                                        .contentType(MediaType.APPLICATION_JSON)
+                        );
+
+                        action
+                                .andExpect(status().isBadRequest());
+                    }
+                }
+
+                @Nested
+                @DisplayName("비밀번호가 일치하고")
+                class Context_passwordMatch {
+
+                    @Nested
+                    @DisplayName("비활성화된 유저일 경우")
+                    class Context_deactivate {
+                        private UserLoginRequest deactivateLoginRequest;
+
+                        @BeforeEach
+                        void setUp() {
+                            String username = "username";
+                            String password = "password";
+                            User user = TestUserFactory.create(username, password, passwordEncoder);
+                            userRepository.save(user);
+
+                            Role role = TestRoleFactory.create(user, RoleType.ROLE_DEACTIVATE);
+                            roleRepository.save(role);
+
+                            deactivateLoginRequest = UserLoginRequest.builder()
+                                    .username(username)
+                                    .password(password)
+                                    .build();
+                        }
+
+                        @Test
+                        @DisplayName("400을 응답한다")
+                        void it_response_400() throws Exception {
+                            ResultActions perform = mockMvc.perform(
+                                    requestBuilder
+                                            .content(objectMapper.writeValueAsString(deactivateLoginRequest))
+                                            .contentType(MediaType.APPLICATION_JSON)
+                            );
+
+                            perform
+                                    .andExpect(status().isBadRequest());
+                        }
+                    }
+
+                    @Nested
+                    @DisplayName("활성화된 유저일 경우")
+                    class Context_activate {
+                        private UserLoginRequest activateUserLoginRequest;
+
+                        @BeforeEach
+                        void setUp() {
+                            String username = "username";
+                            String password = "password";
+                            User user = TestUserFactory.create(username, password, passwordEncoder);
+                            userRepository.save(user);
+
+                            Role role = TestRoleFactory.create(user, RoleType.ROLE_ACTIVATE);
+                            roleRepository.save(role);
+
+                            activateUserLoginRequest = UserLoginRequest.builder()
+                                    .username(username)
+                                    .password(password)
+                                    .build();
+                        }
+
+                        @Test
+                        @DisplayName("201과 액세스 토큰을 응답한다")
+                        void it_response_201_and_return_accessToken() throws Exception {
+                            ResultActions action = mockMvc.perform(
+                                    requestBuilder
+                                            .content(objectMapper.writeValueAsString(activateUserLoginRequest))
+                                            .contentType(MediaType.APPLICATION_JSON)
+                            );
+
+                            action
+                                    .andExpect(status().isCreated())
+                                    .andExpect(jsonPath("$.accessToken").value(matchesRegex(JWT_CREDENTIAL_REGEX)));
+                        }
+
+                    }
+                }
+
+            }
+
+        }
+
     }
 
     @Nested

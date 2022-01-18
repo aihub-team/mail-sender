@@ -1,9 +1,14 @@
 package kr.or.aihub.mailsender.global.config.security.filters;
 
+import kr.or.aihub.mailsender.domain.role.domain.Role;
+import kr.or.aihub.mailsender.domain.role.domain.RoleRepository;
+import kr.or.aihub.mailsender.domain.user.domain.User;
+import kr.or.aihub.mailsender.domain.user.domain.UserRepository;
+import kr.or.aihub.mailsender.domain.user.error.UserNotFoundException;
 import kr.or.aihub.mailsender.global.config.security.auth.UserAuthentication;
 import kr.or.aihub.mailsender.global.config.security.error.EmptyJwtCredentialException;
 import kr.or.aihub.mailsender.global.config.security.error.NotAllowedJwtTypeException;
-import kr.or.aihub.mailsender.global.utils.application.JwtCredentialAuthenticator;
+import kr.or.aihub.mailsender.global.utils.application.JwtCredentialDecoder;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -14,17 +19,27 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.util.List;
 import java.util.Optional;
 
 /**
  * JWT 인증을 담당하는 필터.
  */
 public class JwtAuthenticationFilter extends BasicAuthenticationFilter {
-    private final JwtCredentialAuthenticator jwtCredentialAuthenticator;
+    private final JwtCredentialDecoder jwtCredentialDecoder;
+    private final UserRepository userRepository;
+    private final RoleRepository roleRepository;
 
-    public JwtAuthenticationFilter(AuthenticationManager authenticationManager, JwtCredentialAuthenticator jwtCredentialAuthenticator) {
+    public JwtAuthenticationFilter(
+            AuthenticationManager authenticationManager,
+            JwtCredentialDecoder jwtCredentialDecoder,
+            UserRepository userRepository,
+            RoleRepository roleRepository
+    ) {
         super(authenticationManager);
-        this.jwtCredentialAuthenticator = jwtCredentialAuthenticator;
+        this.jwtCredentialDecoder = jwtCredentialDecoder;
+        this.userRepository = userRepository;
+        this.roleRepository = roleRepository;
     }
 
     @Override
@@ -33,10 +48,13 @@ public class JwtAuthenticationFilter extends BasicAuthenticationFilter {
                 .orElseThrow(EmptyJwtCredentialException::new);
         String jwtCredential = getJwtCredential(authorizationHttpRequestHeader);
 
-        jwtCredentialAuthenticator.authenticate(jwtCredential);
+        Long userId = (Long) jwtCredentialDecoder.decode(jwtCredential, "userId");
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new UserNotFoundException(userId));
+        List<Role> roles = roleRepository.findAllByUser(user);
 
         SecurityContext securityContext = SecurityContextHolder.getContext();
-        securityContext.setAuthentication(new UserAuthentication());
+        securityContext.setAuthentication(new UserAuthentication(userId, roles));
 
         chain.doFilter(request, response);
     }
