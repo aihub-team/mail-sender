@@ -36,7 +36,7 @@ out/
 ### VS Code ###
 .vscode/
 
-### Production Settings ###
+### Production Properties ###
 application-prod.yml
 
 ### github actions self-hosted runner
@@ -47,3 +47,6 @@ actions-runner
 
 ### docker mounted files
 docker/
+
+### Shared Properties ###
+application.yml
