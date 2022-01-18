@@ -1,13 +1,7 @@
 jwt:
   secret: "12345678901234567890123456789012"
 
----
-spring:
-  config:
-    activate:
-      on-profile: local
-  datasource:
-    url: jdbc:h2:~/data/local/mail-sender
-  jpa:
-    hibernate:
-      ddl-auto: create
+mandrill:
+  # 개발 및 테스트용 키. (기능 제한이 있음)
+  apiKey: "WMJZgzS5lH_oUw-wzIQ2Ew"
+

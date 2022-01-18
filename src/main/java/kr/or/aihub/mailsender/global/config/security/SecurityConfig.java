@@ -54,7 +54,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .authorizeRequests()
                 .antMatchers("/").hasRole("ACTIVATE")
                 .antMatchers("/role/*").hasRole("ADMIN")
-                .and()
+                .antMatchers("/mail/transactional/templates/*").hasRole("ACTIVATE").and()
                 .addFilter(jwtAuthenticationFilter)
                 .addFilterBefore(exceptionHandleFilter, JwtAuthenticationFilter.class)
                 .sessionManagement()
