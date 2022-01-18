@@ -20,7 +20,7 @@ public class TransactionalMailController {
         this.mandrillService = mandrillService;
     }
 
-    @GetMapping("/templates")
+    @GetMapping("/templates/send")
     public String templates(
             Model model
     ) throws MandrillApiError, IOException {
@@ -28,7 +28,7 @@ public class TransactionalMailController {
 
         model.addAttribute("templates", templates);
 
-        return "mail/transactional/templates";
+        return "mail/transactional/templates/send";
     }
 
 }

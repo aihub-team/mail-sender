@@ -56,10 +56,10 @@ class TransactionalMailControllerTest {
     }
 
     @Nested
-    @DisplayName("GET /mail/transactional/templates 요청은")
-    class Describe_mailTransactionalTemplates {
+    @DisplayName("GET /mail/transactional/templates/send 요청은")
+    class Describe_mailTransactionalTemplatesSend {
         private final MockHttpServletRequestBuilder requestBuilder =
-                MockMvcRequestBuilders.get("/mail/transactional/templates");
+                MockMvcRequestBuilders.get("/mail/transactional/templates/send");
 
         @Nested
         @DisplayName("인증된 유저일 경우")
