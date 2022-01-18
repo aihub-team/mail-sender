@@ -47,6 +47,3 @@ actions-runner
 
 ### docker mounted files
 docker/
-
-### Shared Properties ###
-application.yml
