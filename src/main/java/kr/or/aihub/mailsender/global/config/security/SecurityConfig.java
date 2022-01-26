@@ -7,6 +7,7 @@ import kr.or.aihub.mailsender.global.config.security.filters.JwtAuthenticationFi
 import kr.or.aihub.mailsender.global.utils.application.JwtCredentialDecoder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.env.Environment;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -17,6 +18,8 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.authentication.HttpStatusEntryPoint;
 
 import javax.servlet.Filter;
+import java.util.Optional;
+import java.util.stream.Stream;
 
 @Configuration
 @EnableGlobalMethodSecurity(securedEnabled = true, prePostEnabled = true)
@@ -24,15 +27,17 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     private final JwtCredentialDecoder jwtCredentialDecoder;
     private final UserRepository userRepository;
     private final RoleRepository roleRepository;
+    private final Environment environment;
 
     public SecurityConfig(
             JwtCredentialDecoder jwtCredentialDecoder,
             UserRepository userRepository,
-            RoleRepository roleRepository
-    ) {
+            RoleRepository roleRepository,
+            Environment environment) {
         this.jwtCredentialDecoder = jwtCredentialDecoder;
         this.userRepository = userRepository;
         this.roleRepository = roleRepository;
+        this.environment = environment;
     }
 
     @Override
@@ -54,10 +59,15 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .authorizeRequests()
                 .antMatchers("/").hasRole("ACTIVATE")
                 .antMatchers("/role/*").hasRole("ADMIN")
-                .antMatchers("/mail/transactional/templates/*").hasRole("ACTIVATE")
-                .and()
-                .addFilter(jwtAuthenticationFilter)
-                .addFilterBefore(exceptionHandleFilter, JwtAuthenticationFilter.class)
+                .antMatchers("/mail/transactional/templates/*").hasRole("ACTIVATE");
+
+        if (!isTestProfile()) {
+            httpSecurity
+                    .addFilter(jwtAuthenticationFilter)
+                    .addFilterBefore(exceptionHandleFilter, JwtAuthenticationFilter.class);
+        }
+
+        httpSecurity
                 .sessionManagement()
                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 .and()
@@ -68,6 +78,19 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .authenticationEntryPoint(
                         new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED)
                 );
+    }
+
+    private boolean isTestProfile() {
+        String[] activeProfiles = environment.getActiveProfiles();
+
+        Optional<String> lastProfile = Stream.of(activeProfiles)
+                .reduce((a, b) -> b);
+
+        if (lastProfile.isEmpty()) {
+            return false;
+        }
+
+        return "test".equals(lastProfile.get());
     }
 
     @Bean

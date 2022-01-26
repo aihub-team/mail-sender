@@ -1,0 +1,11 @@
+package kr.or.aihub.mailsender.global.config.security;
+
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+
+import static kr.or.aihub.mailsender.domain.role.domain.RoleType.ROLE_DEACTIVATE;
+
+@Retention(RetentionPolicy.RUNTIME)
+@WithMockCustomUser(roles = {ROLE_DEACTIVATE})
+public @interface WithMockCustomDeactivateUser {
+}

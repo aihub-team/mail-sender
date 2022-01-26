@@ -12,13 +12,19 @@ import java.util.stream.Collectors;
  * 유저 인증 담당.
  */
 public class UserAuthentication extends AbstractAuthenticationToken {
-    private final Long userId;
+    private Long userId;
 
     public UserAuthentication(Long userId, List<Role> roles) {
         super(authorities(roles));
         this.setAuthenticated(true);
 
         this.userId = userId;
+    }
+
+    public UserAuthentication(List<SimpleGrantedAuthority> authorities) {
+        super(authorities);
+
+        this.setAuthenticated(true);
     }
 
     private static List<GrantedAuthority> authorities(List<Role> roles) {

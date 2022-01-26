@@ -8,7 +8,8 @@ import kr.or.aihub.mailsender.domain.role.dto.RoleAddRequest;
 import kr.or.aihub.mailsender.domain.user.TestUserFactory;
 import kr.or.aihub.mailsender.domain.user.domain.User;
 import kr.or.aihub.mailsender.domain.user.domain.UserRepository;
-import kr.or.aihub.mailsender.global.utils.application.JwtCredentialEncoder;
+import kr.or.aihub.mailsender.global.config.security.WithMockCustomActivateUser;
+import kr.or.aihub.mailsender.global.config.security.WithMockCustomAdminUser;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -29,9 +30,9 @@ import java.util.List;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@DisplayName("RoleController 클래스")
 @SpringBootTest
 @AutoConfigureMockMvc
+@DisplayName("RoleController 클래스")
 class RoleControllerTest {
 
     @Autowired
@@ -39,9 +40,6 @@ class RoleControllerTest {
 
     @Autowired
     private PasswordEncoder passwordEncoder;
-
-    @Autowired
-    private JwtCredentialEncoder jwtCredentialEncoder;
 
     @Autowired
     private RoleRepository roleRepository;
@@ -96,18 +94,8 @@ class RoleControllerTest {
 
         @Nested
         @DisplayName("어드민 권한을 가진 유저의 요청이고")
+        @WithMockCustomAdminUser
         class Context_withAdminRoleUserRequest {
-            private String adminUserJwtCredential;
-
-            @BeforeEach
-            void setUp() {
-                User user = TestUserFactory.create(passwordEncoder);
-                userRepository.save(user);
-
-                saveAdminRoles(user);
-
-                adminUserJwtCredential = jwtCredentialEncoder.encode(user.getId());
-            }
 
             @Nested
             @DisplayName("비활성화된 유저이고")
@@ -143,7 +131,6 @@ class RoleControllerTest {
                                         .param("userId", deactivateUser.getId().toString())
                                         .content(new ObjectMapper().writeValueAsString(this.deactivateRoleAddRequest))
                                         .contentType(MediaType.APPLICATION_JSON)
-                                        .header("Authorization", "Bearer " + adminUserJwtCredential)
                         );
 
                         action
@@ -169,7 +156,6 @@ class RoleControllerTest {
                                         .param("userId", deactivateUser.getId().toString())
                                         .content(new ObjectMapper().writeValueAsString(this.activateRoleAddRequest))
                                         .contentType(MediaType.APPLICATION_JSON)
-                                        .header("Authorization", "Bearer " + adminUserJwtCredential)
                         );
 
                         action
@@ -196,7 +182,6 @@ class RoleControllerTest {
                                         .param("userId", deactivateUser.getId().toString())
                                         .content(new ObjectMapper().writeValueAsString(this.adminRoleAddRequest))
                                         .contentType(MediaType.APPLICATION_JSON)
-                                        .header("Authorization", "Bearer " + adminUserJwtCredential)
                         );
 
                         action
@@ -240,7 +225,6 @@ class RoleControllerTest {
                                         .param("userId", activateUser.getId().toString())
                                         .content(new ObjectMapper().writeValueAsString(this.deactivateRoleAddRequest))
                                         .contentType(MediaType.APPLICATION_JSON)
-                                        .header("Authorization", "Bearer " + adminUserJwtCredential)
                         );
 
                         action
@@ -266,7 +250,6 @@ class RoleControllerTest {
                                         .param("userId", activateUser.getId().toString())
                                         .content(new ObjectMapper().writeValueAsString(this.activateRoleAddRequest))
                                         .contentType(MediaType.APPLICATION_JSON)
-                                        .header("Authorization", "Bearer " + adminUserJwtCredential)
                         );
 
                         action
@@ -293,7 +276,6 @@ class RoleControllerTest {
                                         .param("userId", activateUser.getId().toString())
                                         .content(new ObjectMapper().writeValueAsString(this.adminRoleAddRequest))
                                         .contentType(MediaType.APPLICATION_JSON)
-                                        .header("Authorization", "Bearer " + adminUserJwtCredential)
                         );
 
                         action
@@ -337,7 +319,6 @@ class RoleControllerTest {
                                         .param("userId", adminUser.getId().toString())
                                         .content(new ObjectMapper().writeValueAsString(this.deactivateRoleAddRequest))
                                         .contentType(MediaType.APPLICATION_JSON)
-                                        .header("Authorization", "Bearer " + adminUserJwtCredential)
                         );
 
                         action
@@ -363,7 +344,6 @@ class RoleControllerTest {
                                         .param("userId", adminUser.getId().toString())
                                         .content(new ObjectMapper().writeValueAsString(this.activateRoleAddRequest))
                                         .contentType(MediaType.APPLICATION_JSON)
-                                        .header("Authorization", "Bearer " + adminUserJwtCredential)
                         );
 
                         action
@@ -390,12 +370,10 @@ class RoleControllerTest {
                                         .param("userId", adminUser.getId().toString())
                                         .content(new ObjectMapper().writeValueAsString(this.adminRoleAddRequest))
                                         .contentType(MediaType.APPLICATION_JSON)
-                                        .header("Authorization", "Bearer " + adminUserJwtCredential)
                         );
 
                         action
                                 .andExpect(status().isBadRequest());
-
                     }
                 }
             }
@@ -403,19 +381,9 @@ class RoleControllerTest {
         } // 어드민 유저
 
         @Nested
-        @DisplayName("어드민이 아닌 유저의 Jwt 자격증명이 주어지고")
+        @DisplayName("어드민이 아닌 유저의 요청이고")
+        @WithMockCustomActivateUser
         class Context_withNotAdminUserJwtCredential {
-            private String notAdminUserJwtCredential;
-
-            @BeforeEach
-            void setUp() {
-                User user = TestUserFactory.create(passwordEncoder);
-                userRepository.save(user);
-
-                saveActivateRoles(user);
-
-                this.notAdminUserJwtCredential = jwtCredentialEncoder.encode(user.getId());
-            }
 
             @Nested
             @DisplayName("비활성화된 유저이고")
@@ -450,7 +418,6 @@ class RoleControllerTest {
                                         .param("userId", deactivateUser.getId().toString())
                                         .content(new ObjectMapper().writeValueAsString(this.deactivateRoleAddRequest))
                                         .contentType(MediaType.APPLICATION_JSON)
-                                        .header("Authorization", "Bearer " + notAdminUserJwtCredential)
                         );
 
                         action
@@ -476,7 +443,6 @@ class RoleControllerTest {
                                         .param("userId", deactivateUser.getId().toString())
                                         .content(new ObjectMapper().writeValueAsString(this.activateRoleAddRequest))
                                         .contentType(MediaType.APPLICATION_JSON)
-                                        .header("Authorization", "Bearer " + notAdminUserJwtCredential)
                         );
 
                         action
@@ -504,7 +470,6 @@ class RoleControllerTest {
                                         .param("userId", deactivateUser.getId().toString())
                                         .content(new ObjectMapper().writeValueAsString(this.adminRoleAddRequest))
                                         .contentType(MediaType.APPLICATION_JSON)
-                                        .header("Authorization", "Bearer " + notAdminUserJwtCredential)
                         );
 
                         action
@@ -549,7 +514,6 @@ class RoleControllerTest {
                                         .param("userId", activateUser.getId().toString())
                                         .content(new ObjectMapper().writeValueAsString(this.activateRoleAddRequest))
                                         .contentType(MediaType.APPLICATION_JSON)
-                                        .header("Authorization", "Bearer " + notAdminUserJwtCredential)
                         );
 
                         action
@@ -577,7 +541,6 @@ class RoleControllerTest {
                                         .param("userId", activateUser.getId().toString())
                                         .content(new ObjectMapper().writeValueAsString(this.adminRoleAddRequest))
                                         .contentType(MediaType.APPLICATION_JSON)
-                                        .header("Authorization", "Bearer " + notAdminUserJwtCredential)
                         );
 
                         action
@@ -605,7 +568,6 @@ class RoleControllerTest {
                                         .param("userId", activateUser.getId().toString())
                                         .content(new ObjectMapper().writeValueAsString(this.deactivateRoleAddRequest))
                                         .contentType(MediaType.APPLICATION_JSON)
-                                        .header("Authorization", "Bearer " + notAdminUserJwtCredential)
                         );
 
                         action
@@ -650,7 +612,6 @@ class RoleControllerTest {
                                         .param("userId", adminUser.getId().toString())
                                         .content(new ObjectMapper().writeValueAsString(this.deactivateRoleAddRequest))
                                         .contentType(MediaType.APPLICATION_JSON)
-                                        .header("Authorization", "Bearer " + notAdminUserJwtCredential)
                         );
 
                         action
@@ -677,7 +638,6 @@ class RoleControllerTest {
                                         .param("userId", adminUser.getId().toString())
                                         .content(new ObjectMapper().writeValueAsString(this.activateRoleAddRequest))
                                         .contentType(MediaType.APPLICATION_JSON)
-                                        .header("Authorization", "Bearer " + notAdminUserJwtCredential)
                         );
 
                         action
@@ -705,7 +665,6 @@ class RoleControllerTest {
                                         .param("userId", adminUser.getId().toString())
                                         .content(new ObjectMapper().writeValueAsString(this.adminRoleAddRequest))
                                         .contentType(MediaType.APPLICATION_JSON)
-                                        .header("Authorization", "Bearer " + notAdminUserJwtCredential)
                         );
 
                         action
