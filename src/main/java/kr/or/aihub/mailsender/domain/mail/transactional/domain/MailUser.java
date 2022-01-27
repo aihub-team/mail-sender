@@ -22,6 +22,9 @@ public class MailUser {
     @CsvBindByName
     private String email;
 
+    public MailUser() {
+    }
+
     @Builder
     public MailUser(String data, String name, String belong, String division, String email) {
         this.data = data;
