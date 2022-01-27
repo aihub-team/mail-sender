@@ -39,8 +39,9 @@ public class TransactionalMailSender {
      * @throws NotSupportedFileExtensionException 지원되지 않는 확장자일 경우
      * @throws NotExistPublishNameException       존재하지 않는 발행 이름일 경우
      */
-    public List<TemplateSendResponse> sendTemplate(TemplateSendRequest templateSendRequest)
-            throws IOException, MandrillApiError {
+    public List<TemplateSendResponse> sendTemplate(
+            TemplateSendRequest templateSendRequest
+    ) throws IOException, MandrillApiError {
         String publishName = templateSendRequest.getPublishName();
         List<TemplatesResponse> templates = mandrillService.getTemplates();
 

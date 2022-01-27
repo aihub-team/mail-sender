@@ -1,6 +1,7 @@
 package kr.or.aihub.mailsender.domain.mail.transactional.application;
 
 import com.microtripit.mandrillapp.lutung.model.MandrillApiError;
+import kr.or.aihub.mailsender.domain.mail.transactional.domain.MailUser;
 import kr.or.aihub.mailsender.domain.mail.transactional.dto.TemplateSendRequest;
 import kr.or.aihub.mailsender.domain.mail.transactional.dto.TemplateSendResponse;
 import kr.or.aihub.mailsender.domain.mail.transactional.dto.TemplatesResponse;
@@ -22,7 +23,7 @@ import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
@@ -46,13 +47,14 @@ class TransactionalMailSenderTest {
             StringBuilder csvBuilder = new StringBuilder();
 
             csvBuilder.append("data,name,belong,division,email");
+            csvBuilder.append("\n");
             csvBuilder.append(",박주영,,,jypark1@wise.co.kr");
 
             InputStream inputStream = new ByteArrayInputStream(csvBuilder.toString().getBytes());
 
             try {
                 return new MockMultipartFile(
-                        "name",
+                        "file",
                         originalFilename,
                         null,
                         inputStream
@@ -194,16 +196,18 @@ class TransactionalMailSenderTest {
 
                 @BeforeEach
                 void setUp() throws MandrillApiError, IOException {
-                    given(mandrillService.sendWithTemplate(eq(existPublishName), any(
-                            List.class
-                    )))
-                            .willReturn(Arrays.asList(TemplateSendResponse.builder()
-                                    .email("jypark1@wise.co.kr")
-                                    .status("sent")
-                                    .rejectReason(null)
-                                    .id(null)
-                                    .build())
-                            );
+                    given(mandrillService.sendWithTemplate(eq(existPublishName), anyList()))
+                            .will(invocation -> {
+                                List<MailUser> mailUsers = invocation.getArgument(1);
+                                MailUser mailUser = mailUsers.get(0);
+
+                                return Arrays.asList(
+                                        TemplateSendResponse.builder()
+                                                .email(mailUser.getEmail())
+                                                .status("sent")
+                                                .build()
+                                );
+                            });
 
                     this.supportedExtensionFiles = Arrays.asList(
                             createFileWithOriginalFilename("a.csv")
