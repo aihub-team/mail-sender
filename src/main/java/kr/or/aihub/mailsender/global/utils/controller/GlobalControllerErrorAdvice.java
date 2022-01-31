@@ -1,5 +1,7 @@
 package kr.or.aihub.mailsender.global.utils.controller;
 
+import kr.or.aihub.mailsender.domain.mail.transactional.errors.NotExistPublishNameException;
+import kr.or.aihub.mailsender.domain.mail.transactional.errors.NotSupportedFileExtensionException;
 import kr.or.aihub.mailsender.domain.role.errors.AlreadyGrantedRoleException;
 import kr.or.aihub.mailsender.domain.user.error.ConfirmPasswordNotMatchException;
 import kr.or.aihub.mailsender.domain.user.error.DeactivateUserException;
@@ -69,6 +71,33 @@ public class GlobalControllerErrorAdvice {
     @ExceptionHandler(AlreadyGrantedRoleException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ErrorResponse alreadyGrantedRoleExceptionHandler(AlreadyGrantedRoleException e) {
+        return new ErrorResponse(e.getMessage());
+    }
+
+    /**
+     * 존재하지 않는 발행 이름을 경우를 처리합니다.
+     */
+    @ExceptionHandler(NotExistPublishNameException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ErrorResponse notExistPublishNameExceptionHandler(NotExistPublishNameException e) {
+        return new ErrorResponse(e.getMessage());
+    }
+
+    /**
+     * 잘못된 인자가 들어온 경우를 처리합니다.
+     */
+    @ExceptionHandler(IllegalArgumentException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ErrorResponse illegalArgumentExceptionHandler(IllegalArgumentException e) {
+        return new ErrorResponse(e.getMessage());
+    }
+
+    /**
+     * 지원되지 않는 확장자일 경우를 처리합니다.
+     */
+    @ExceptionHandler(NotSupportedFileExtensionException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ErrorResponse notSupportedFileExtensionExceptionHandler(NotSupportedFileExtensionException e) {
         return new ErrorResponse(e.getMessage());
     }
 }
