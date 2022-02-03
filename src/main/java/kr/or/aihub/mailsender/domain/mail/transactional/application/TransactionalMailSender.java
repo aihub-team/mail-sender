@@ -39,11 +39,9 @@ public class TransactionalMailSender {
      */
     public List<TemplateSendResponse> sendTemplate(
             TemplateSendRequest templateSendRequest
-    ) throws IOException, MandrillApiError {
+    ) throws MandrillApiError, IOException {
         String publishName = templateSendRequest.getPublishName();
-        List<TemplatesResponse> templates = mandrillService.getTemplates();
-
-        checkExist(publishName, templates);
+        checkExist(publishName);
 
         MultipartFile userListFile = templateSendRequest.getUserListFile();
         checkNull(userListFile);
@@ -58,10 +56,11 @@ public class TransactionalMailSender {
      * 존재하는 발행 이름인지 확인합니다.
      *
      * @param publishName 발행 이름
-     * @param templates   전체 템플릿
      * @throws NotExistPublishNameException 존재하지 않는 발행 이름일 경우
      */
-    private void checkExist(String publishName, List<TemplatesResponse> templates) {
+    private void checkExist(String publishName) throws MandrillApiError, IOException {
+        List<TemplatesResponse> templates = mandrillService.getTemplates();
+
         boolean existPublishName = templates.stream()
                 .map(TemplatesResponse::getPublishName)
                 .anyMatch(publishName::equals);
