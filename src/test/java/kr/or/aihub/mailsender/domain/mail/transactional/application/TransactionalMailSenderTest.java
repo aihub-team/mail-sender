@@ -13,6 +13,9 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.NullAndEmptySource;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -20,7 +23,6 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -87,68 +89,39 @@ class TransactionalMailSenderTest {
                 this.existPublishName = existPublishName;
             }
 
-            @Nested
-            @DisplayName("file이 null인 경우")
-            class Context_nullFile {
-                private MultipartFile nullFile;
-
-                @BeforeEach
-                void setUp() {
-                    this.nullFile = null;
-                }
-
-                @Test
-                @DisplayName("IllegalArgumentException을 던진다")
-                void It_throwsIllegalArgumentException() {
-                    assertThatThrownBy(() -> {
-                        transactionalMailSender.sendTemplate(new TemplateSendRequest(nullFile, existPublishName));
-                    }).isInstanceOf(IllegalArgumentException.class);
-                }
-
-            }
 
             @Nested
-            @DisplayName("file이 지원하는 확장자가 아닌 경우")
-            class Context_notSupportedFileExtensions {
-                private List<MockMultipartFile> notSupportedFileExtensions;
+            @DisplayName("file 이름이 지원하는 확장자가 아닌 경우")
+            class Context_notSupportedExtensionFilenames {
 
-                @BeforeEach
-                void setUp() {
-                    List<String> originalFilenames = Arrays.asList(
-                            "a.xlsx",
-                            "b.xls",
-                            "c.txt"
-                    );
-
-                    this.notSupportedFileExtensions = originalFilenames.stream()
-                            .map(TestCsvUserListFileFactory::create)
-                            .collect(Collectors.toList());
-                }
-
-                @Test
+                @ParameterizedTest
+                @ValueSource(strings = {
+                        "a.xlsx",
+                        "b.xls",
+                        "c.txt"
+                })
                 @DisplayName("NotSupportedFileExtensionException을 던진다")
-                void It_throwsNotSupportedFileExtensionException() {
-                    for (MockMultipartFile notSupportedFileExtension : this.notSupportedFileExtensions) {
-                        assertThatThrownBy(() -> {
-                            transactionalMailSender.sendTemplate(new TemplateSendRequest(notSupportedFileExtension, existPublishName));
-                        }).isInstanceOf(NotSupportedFileExtensionException.class);
-                    }
+                void It_throwsNotSupportedFileExtensionException(String notSupportedExtensionFilename) {
+                    MultipartFile notSupportedExtensionFile = TestCsvUserListFileFactory.create(notSupportedExtensionFilename);
+
+                    assertThatThrownBy(() -> {
+                        transactionalMailSender.sendTemplate(new TemplateSendRequest(notSupportedExtensionFile, existPublishName));
+                    }).isInstanceOf(NotSupportedFileExtensionException.class);
                 }
             }
 
             @Nested
-            @DisplayName("file 확장자가 없는 경우")
-            class Context_noExtensionFile {
-                private MockMultipartFile noExtensionFile;
+            @DisplayName("file 이름 확장자가 없는 경우")
+            class Context_noExtensionFilename {
 
-                @BeforeEach
-                void setUp() {
-                    this.noExtensionFile = TestCsvUserListFileFactory.create("a");
-                }
-
-                @Test
+                @ParameterizedTest
+                @ValueSource(strings = {
+                        "a"
+                })
                 @DisplayName("IllegalArgumentException을 던진다")
-                void It_throwsIllegalArgumentException() {
+                void It_throwsIllegalArgumentException(String noExtensionFilename) {
+                    MockMultipartFile noExtensionFile = TestCsvUserListFileFactory.create(noExtensionFilename);
+
                     assertThatThrownBy(() ->
                             transactionalMailSender.sendTemplate(new TemplateSendRequest(noExtensionFile, existPublishName))
                     ).isInstanceOf(IllegalArgumentException.class);
@@ -156,18 +129,15 @@ class TransactionalMailSenderTest {
             }
 
             @Nested
-            @DisplayName("file 확장자가 빈 값인 경우")
-            class Context_emptyFile {
-                private MockMultipartFile emptyFile;
+            @DisplayName("file 이름 확장자가 비거나 널 값인 경우")
+            class Context_emptyOrNullFilename {
 
-                @BeforeEach
-                void setUp() {
-                    this.emptyFile = TestCsvUserListFileFactory.create("");
-                }
-
-                @Test
+                @ParameterizedTest
+                @NullAndEmptySource
                 @DisplayName("IllegalArgumentException을 던진다")
-                void It_throwsIllegalArgumentException() {
+                void It_throwsIllegalArgumentException(String emptyOrNullFilename) {
+                    MockMultipartFile emptyFile = TestCsvUserListFileFactory.create(emptyOrNullFilename);
+
                     assertThatThrownBy(() ->
                             transactionalMailSender.sendTemplate(new TemplateSendRequest(emptyFile, existPublishName))
                     ).isInstanceOf(IllegalArgumentException.class);
@@ -175,9 +145,8 @@ class TransactionalMailSenderTest {
             }
 
             @Nested
-            @DisplayName("file이 지원하는 확장자일 경우")
-            class Context_supportedExtensionFile {
-                private List<MockMultipartFile> supportedExtensionFiles;
+            @DisplayName("file 이름이 지원하는 확장자일 경우")
+            class Context_supportedExtensionFilename {
 
                 @BeforeEach
                 void setUp() throws MandrillApiError, IOException {
@@ -193,27 +162,26 @@ class TransactionalMailSenderTest {
                                                 .build()
                                 );
                             });
-
-                    this.supportedExtensionFiles = Arrays.asList(
-                            TestCsvUserListFileFactory.create("a.csv")
-                    );
                 }
 
-                @Test
+                @ParameterizedTest
+                @ValueSource(strings = {
+                        "a.csv"
+                })
                 @DisplayName("발송 결과를 리턴한다")
-                void It_doesNotThrowAnyException() throws MandrillApiError, IOException {
-                    for (MockMultipartFile supportedExtensionFile : this.supportedExtensionFiles) {
-                        List<TemplateSendResponse> templateSendResponses
-                                = transactionalMailSender.sendTemplate(new TemplateSendRequest(supportedExtensionFile, existPublishName));
+                void It_doesNotThrowAnyException(String supportedExtensionFilename) throws MandrillApiError, IOException {
+                    MockMultipartFile supportedExtensionFile = TestCsvUserListFileFactory.create(supportedExtensionFilename);
 
-                        assertThat(templateSendResponses).isNotNull();
+                    List<TemplateSendResponse> templateSendResponses
+                            = transactionalMailSender.sendTemplate(new TemplateSendRequest(supportedExtensionFile, existPublishName));
 
-                        TemplateSendResponse templateSendResponse = templateSendResponses.get(0);
-                        assertThat(templateSendResponse.getEmail()).isEqualTo("jypark1@wise.co.kr");
-                        assertThat(templateSendResponse.getStatus()).isEqualTo("sent");
-                        assertThat(templateSendResponse.getRejectReason()).isNull();
-                        assertThat(templateSendResponse.getId()).isNull();
-                    }
+                    assertThat(templateSendResponses).isNotNull();
+
+                    TemplateSendResponse templateSendResponse = templateSendResponses.get(0);
+                    assertThat(templateSendResponse.getEmail()).isEqualTo("jypark1@wise.co.kr");
+                    assertThat(templateSendResponse.getStatus()).isEqualTo("sent");
+                    assertThat(templateSendResponse.getRejectReason()).isNull();
+                    assertThat(templateSendResponse.getId()).isNull();
                 }
             }
         }
