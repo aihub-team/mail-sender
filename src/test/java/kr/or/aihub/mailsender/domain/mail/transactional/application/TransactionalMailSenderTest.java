@@ -7,7 +7,8 @@ import kr.or.aihub.mailsender.domain.mail.transactional.dto.TemplateSendResponse
 import kr.or.aihub.mailsender.domain.mail.transactional.dto.TemplatesResponse;
 import kr.or.aihub.mailsender.domain.mail.transactional.errors.NotExistPublishNameException;
 import kr.or.aihub.mailsender.domain.mail.transactional.errors.NotSupportedFileExtensionException;
-import kr.or.aihub.mailsender.global.utils.application.MailUserCsvConvertor;
+import kr.or.aihub.mailsender.global.utils.TestCsvUserListFileFactory;
+import kr.or.aihub.mailsender.global.utils.application.CsvMailUserConvertor;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -15,10 +16,9 @@ import org.junit.jupiter.api.Test;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -32,41 +32,19 @@ import static org.mockito.Mockito.mock;
 @DisplayName("TransactionalMailSender 클래스")
 class TransactionalMailSenderTest {
     private final MandrillService mandrillService = mock(MandrillService.class);
-    private final MailUserCsvConvertor mailUserCsvConvertor = new MailUserCsvConvertor();
 
     private TransactionalMailSender transactionalMailSender;
 
     @BeforeEach
     void setUp() {
-        this.transactionalMailSender = new TransactionalMailSender(mandrillService, mailUserCsvConvertor);
+        CsvMailUserConvertor csvMailUserConvertor = new CsvMailUserConvertor();
+
+        this.transactionalMailSender = new TransactionalMailSender(mandrillService, csvMailUserConvertor);
     }
 
     @Nested
     @DisplayName("sendTemplates 메서드는")
     class Describe_sendTemplates {
-
-        private MockMultipartFile createFileWithOriginalFilename(String originalFilename) {
-            StringBuilder csvBuilder = new StringBuilder();
-
-            csvBuilder.append("data,name,belong,division,email");
-            csvBuilder.append("\n");
-            csvBuilder.append(",박주영,,,jypark1@wise.co.kr");
-
-            InputStream inputStream = new ByteArrayInputStream(csvBuilder.toString().getBytes());
-
-            try {
-                return new MockMultipartFile(
-                        "file",
-                        originalFilename,
-                        null,
-                        inputStream
-                );
-            } catch (IOException e) {
-                e.printStackTrace();
-
-                return null;
-            }
-        }
 
         @Nested
         @DisplayName("존재하지 않는 발행 이름일 경우")
@@ -74,14 +52,19 @@ class TransactionalMailSenderTest {
             private String notExistPublishName;
 
             @BeforeEach
-            void setUp() {
-                this.notExistPublishName = "notExist";
+            void setUp() throws MandrillApiError, IOException {
+                String notExistPublishName = "notExistPublishName";
+
+                given(mandrillService.getTemplates())
+                        .willReturn(Collections.emptyList());
+
+                this.notExistPublishName = notExistPublishName;
             }
 
             @Test
-            @DisplayName("예외를 던진다")
+            @DisplayName("NotExistPublishNameException 예외를 던진다")
             void It_throwsNotExistPublishNameException() {
-                MockMultipartFile file = createFileWithOriginalFilename("test.csv");
+                MockMultipartFile file = TestCsvUserListFileFactory.create();
 
                 assertThatThrownBy(() -> {
                     transactionalMailSender.sendTemplate(new TemplateSendRequest(file, notExistPublishName));
@@ -138,7 +121,7 @@ class TransactionalMailSenderTest {
                     );
 
                     this.notSupportedFileExtensions = originalFilenames.stream()
-                            .map(originalFilename -> createFileWithOriginalFilename(originalFilename))
+                            .map(TestCsvUserListFileFactory::create)
                             .collect(Collectors.toList());
                 }
 
@@ -160,7 +143,7 @@ class TransactionalMailSenderTest {
 
                 @BeforeEach
                 void setUp() {
-                    this.noExtensionFile = createFileWithOriginalFilename("a");
+                    this.noExtensionFile = TestCsvUserListFileFactory.create("a");
                 }
 
                 @Test
@@ -179,7 +162,7 @@ class TransactionalMailSenderTest {
 
                 @BeforeEach
                 void setUp() {
-                    this.emptyFile = createFileWithOriginalFilename("");
+                    this.emptyFile = TestCsvUserListFileFactory.create("");
                 }
 
                 @Test
@@ -212,7 +195,7 @@ class TransactionalMailSenderTest {
                             });
 
                     this.supportedExtensionFiles = Arrays.asList(
-                            createFileWithOriginalFilename("a.csv")
+                            TestCsvUserListFileFactory.create("a.csv")
                     );
                 }
 

@@ -1,21 +1,17 @@
 package kr.or.aihub.mailsender.domain.mail.transactional.application;
 
 import com.microtripit.mandrillapp.lutung.model.MandrillApiError;
-import com.opencsv.bean.CsvToBean;
-import com.opencsv.bean.CsvToBeanBuilder;
 import kr.or.aihub.mailsender.domain.mail.transactional.domain.MailUser;
 import kr.or.aihub.mailsender.domain.mail.transactional.dto.TemplateSendRequest;
 import kr.or.aihub.mailsender.domain.mail.transactional.dto.TemplateSendResponse;
 import kr.or.aihub.mailsender.domain.mail.transactional.dto.TemplatesResponse;
 import kr.or.aihub.mailsender.domain.mail.transactional.errors.NotExistPublishNameException;
 import kr.or.aihub.mailsender.domain.mail.transactional.errors.NotSupportedFileExtensionException;
+import kr.or.aihub.mailsender.global.utils.application.CsvMailUserConvertor;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.Reader;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
@@ -26,9 +22,11 @@ import java.util.Optional;
 @Service
 public class TransactionalMailSender {
     private final MandrillService mandrillService;
+    private final CsvMailUserConvertor csvMailUserConvertor;
 
-    public TransactionalMailSender(MandrillService mandrillService) {
+    public TransactionalMailSender(MandrillService mandrillService, CsvMailUserConvertor csvMailUserConvertor) {
         this.mandrillService = mandrillService;
+        this.csvMailUserConvertor = csvMailUserConvertor;
     }
 
     /**
@@ -51,7 +49,7 @@ public class TransactionalMailSender {
         checkNull(userListFile);
         checkSupportedExtension(userListFile);
 
-        List<MailUser> mailUsers = parseToGetMailUsers(userListFile);
+        List<MailUser> mailUsers = csvMailUserConvertor.convert(userListFile);
 
         return mandrillService.sendWithTemplate(publishName, mailUsers);
     }
@@ -71,22 +69,6 @@ public class TransactionalMailSender {
         if (!existPublishName) {
             throw new NotExistPublishNameException(publishName);
         }
-    }
-
-
-    private List<MailUser> parseToGetMailUsers(MultipartFile file) throws IOException {
-        Reader reader = new BufferedReader(new InputStreamReader(file.getInputStream()));
-
-        CsvToBean<MailUser> bean = new CsvToBeanBuilder(reader)
-                .withType(MailUser.class)
-                .withIgnoreLeadingWhiteSpace(true)
-                .build();
-
-        List<MailUser> mailUsers = bean.parse();
-
-        reader.close();
-
-        return mailUsers;
     }
 
     private void checkNull(MultipartFile file) {
