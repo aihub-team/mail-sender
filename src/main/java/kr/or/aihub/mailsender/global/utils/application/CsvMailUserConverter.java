@@ -16,7 +16,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Component
-public class CsvMailUserConvertor {
+public class CsvMailUserConverter {
 
     public List<MailUser> convert(MultipartFile userListFile) throws FileParsingException {
         checkNull(userListFile);

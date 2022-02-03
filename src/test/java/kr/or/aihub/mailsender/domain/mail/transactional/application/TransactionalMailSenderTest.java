@@ -8,7 +8,7 @@ import kr.or.aihub.mailsender.domain.mail.transactional.dto.TemplatesResponse;
 import kr.or.aihub.mailsender.domain.mail.transactional.errors.NotExistPublishNameException;
 import kr.or.aihub.mailsender.domain.mail.transactional.errors.NotSupportedFileExtensionException;
 import kr.or.aihub.mailsender.global.utils.TestCsvUserListFileFactory;
-import kr.or.aihub.mailsender.global.utils.application.CsvMailUserConvertor;
+import kr.or.aihub.mailsender.global.utils.application.CsvMailUserConverter;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -37,9 +37,9 @@ class TransactionalMailSenderTest {
 
     @BeforeEach
     void setUp() {
-        CsvMailUserConvertor csvMailUserConvertor = new CsvMailUserConvertor();
+        CsvMailUserConverter csvMailUserConverter = new CsvMailUserConverter();
 
-        this.transactionalMailSender = new TransactionalMailSender(mandrillService, csvMailUserConvertor);
+        this.transactionalMailSender = new TransactionalMailSender(mandrillService, csvMailUserConverter);
     }
 
     @Nested

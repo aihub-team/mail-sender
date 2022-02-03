@@ -19,12 +19,12 @@ import java.util.List;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 
-public class CsvMailUserConvertorTest {
-    private CsvMailUserConvertor csvMailUserConvertor;
+public class CsvMailUserConverterTest {
+    private CsvMailUserConverter csvMailUserConverter;
 
     @BeforeEach
     void setUp() {
-        this.csvMailUserConvertor = new CsvMailUserConvertor();
+        this.csvMailUserConverter = new CsvMailUserConverter();
     }
 
     @Nested
@@ -44,7 +44,7 @@ public class CsvMailUserConvertorTest {
             @Test
             @DisplayName("변환된 MailUser 리스트를 리턴한다")
             void It_returnsConvertedToMailUser() throws FileParsingException {
-                List<MailUser> mailUserList = csvMailUserConvertor.convert(userListFile);
+                List<MailUser> mailUserList = csvMailUserConverter.convert(userListFile);
 
                 MailUser mailUser = mailUserList.get(0);
                 assertThat(mailUser.getEmail()).isEqualTo("jypark1@wise.co.kr");
@@ -66,7 +66,7 @@ public class CsvMailUserConvertorTest {
             @Test
             @DisplayName("FileParsingException을 던진다")
             void It_throwsFileParsingException() {
-                assertThatThrownBy(() -> csvMailUserConvertor.convert(inValidMailUserAttributes))
+                assertThatThrownBy(() -> csvMailUserConverter.convert(inValidMailUserAttributes))
                         .isInstanceOf(FileParsingException.class);
             }
         }
@@ -79,7 +79,7 @@ public class CsvMailUserConvertorTest {
             @NullSource
             @DisplayName("IllegalArgumentExcpetion을 던진다")
             void It_throwsIllegalArgumentException(MultipartFile nullFile) {
-                assertThatThrownBy(() -> csvMailUserConvertor.convert(nullFile))
+                assertThatThrownBy(() -> csvMailUserConverter.convert(nullFile))
                         .isInstanceOf(IllegalArgumentException.class);
             }
         }
@@ -98,7 +98,7 @@ public class CsvMailUserConvertorTest {
             void It_throwsException(String notCsvExtensionFilename) {
                 MultipartFile notCsvExtensionUserListFile = TestCsvUserListFileFactory.create(notCsvExtensionFilename);
 
-                assertThatThrownBy(() -> csvMailUserConvertor.convert(notCsvExtensionUserListFile))
+                assertThatThrownBy(() -> csvMailUserConverter.convert(notCsvExtensionUserListFile))
                         .isInstanceOf(NotSupportedFileExtensionException.class);
             }
         }

@@ -7,7 +7,7 @@ import kr.or.aihub.mailsender.domain.mail.transactional.dto.TemplateSendResponse
 import kr.or.aihub.mailsender.domain.mail.transactional.dto.TemplatesResponse;
 import kr.or.aihub.mailsender.domain.mail.transactional.errors.NotExistPublishNameException;
 import kr.or.aihub.mailsender.domain.mail.transactional.errors.NotSupportedFileExtensionException;
-import kr.or.aihub.mailsender.global.utils.application.CsvMailUserConvertor;
+import kr.or.aihub.mailsender.global.utils.application.CsvMailUserConverter;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -20,11 +20,11 @@ import java.util.List;
 @Service
 public class TransactionalMailSender {
     private final MandrillService mandrillService;
-    private final CsvMailUserConvertor csvMailUserConvertor;
+    private final CsvMailUserConverter csvMailUserConverter;
 
-    public TransactionalMailSender(MandrillService mandrillService, CsvMailUserConvertor csvMailUserConvertor) {
+    public TransactionalMailSender(MandrillService mandrillService, CsvMailUserConverter csvMailUserConverter) {
         this.mandrillService = mandrillService;
-        this.csvMailUserConvertor = csvMailUserConvertor;
+        this.csvMailUserConverter = csvMailUserConverter;
     }
 
     /**
@@ -42,7 +42,7 @@ public class TransactionalMailSender {
         checkExist(publishName);
 
         MultipartFile userListFile = templateSendRequest.getUserListFile();
-        List<MailUser> mailUsers = csvMailUserConvertor.convert(userListFile);
+        List<MailUser> mailUsers = csvMailUserConverter.convert(userListFile);
 
         return mandrillService.sendWithTemplate(publishName, mailUsers);
     }
