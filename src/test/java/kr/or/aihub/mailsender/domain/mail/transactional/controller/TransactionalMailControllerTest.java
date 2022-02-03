@@ -7,6 +7,7 @@ import kr.or.aihub.mailsender.domain.mail.transactional.dto.TemplateSendResponse
 import kr.or.aihub.mailsender.domain.mail.transactional.dto.TemplatesResponse;
 import kr.or.aihub.mailsender.global.config.security.WithMockCustomActivateUser;
 import kr.or.aihub.mailsender.global.config.security.WithMockCustomDeactivateUser;
+import kr.or.aihub.mailsender.global.utils.TestCsvUserListFileFactory;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -26,10 +27,7 @@ import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilde
 import org.springframework.test.web.servlet.request.MockMultipartHttpServletRequestBuilder;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -108,29 +106,6 @@ class TransactionalMailControllerTest {
         private final MockMultipartHttpServletRequestBuilder requestBuilder =
                 MockMvcRequestBuilders.multipart(PREFIX_URL + "/templates/send");
 
-        private MockMultipartFile createFileWithOriginalFilename(String originalFilename) {
-            StringBuilder csvBuilder = new StringBuilder();
-
-            csvBuilder.append("data,name,belong,division,email");
-            csvBuilder.append("\n");
-            csvBuilder.append(",박주영,,,jypark1@wise.co.kr");
-
-            InputStream inputStream = new ByteArrayInputStream(csvBuilder.toString().getBytes(StandardCharsets.UTF_8));
-
-            try {
-                return new MockMultipartFile(
-                        "file",
-                        originalFilename,
-                        null,
-                        inputStream
-                );
-            } catch (IOException e) {
-                e.printStackTrace();
-
-                return null;
-            }
-        }
-
         @Nested
         @DisplayName("활성화된 유저이고")
         @WithMockCustomActivateUser
@@ -178,7 +153,7 @@ class TransactionalMailControllerTest {
                     })
                     @DisplayName("303을 응답하고 조회 페이지로 리다이렉트 된다")
                     void It_response303AndRedirectGetPage(String supportedExtensionFileName) throws Exception {
-                        MockMultipartFile file = createFileWithOriginalFilename(supportedExtensionFileName);
+                        MockMultipartFile file = TestCsvUserListFileFactory.create(supportedExtensionFileName);
 
                         ResultActions action = mockMvc.perform(
                                 requestBuilder
@@ -201,7 +176,7 @@ class TransactionalMailControllerTest {
                     @NullAndEmptySource
                     @DisplayName("400을 응답한다")
                     void It_response400(String emptyOrNullFileName) throws Exception {
-                        MockMultipartFile file = createFileWithOriginalFilename(emptyOrNullFileName);
+                        MockMultipartFile file = TestCsvUserListFileFactory.create(emptyOrNullFileName);
 
                         ResultActions action = mockMvc.perform(
                                 requestBuilder
@@ -227,7 +202,7 @@ class TransactionalMailControllerTest {
                     })
                     @DisplayName("400을 응답한다")
                     void It_response400(String notSupportedExtensionFileName) throws Exception {
-                        MockMultipartFile file = createFileWithOriginalFilename(notSupportedExtensionFileName);
+                        MockMultipartFile file = TestCsvUserListFileFactory.create(notSupportedExtensionFileName);
 
                         ResultActions action = mockMvc.perform(
                                 requestBuilder
@@ -251,7 +226,7 @@ class TransactionalMailControllerTest {
                     })
                     @DisplayName("400을 응답한다")
                     void It_response400(String noExtensionFilename) throws Exception {
-                        MockMultipartFile file = createFileWithOriginalFilename(noExtensionFilename);
+                        MockMultipartFile file = TestCsvUserListFileFactory.create(noExtensionFilename);
 
                         ResultActions action = mockMvc.perform(
                                 requestBuilder
@@ -280,19 +255,10 @@ class TransactionalMailControllerTest {
                         this.notExistPublishName = "notExistPublishName";
                     }
 
-                    @ParameterizedTest
-                    @ValueSource(strings = {
-                            "a.csv",
-                            "b.xlsx",
-                            "c.xls",
-                            "d.txt",
-                            "e",
-                            ".csv",
-                    })
-                    @NullAndEmptySource
+                    @Test
                     @DisplayName("400을 응답한다")
-                    void It_response400(String supportedExtensionFileName) throws Exception {
-                        MockMultipartFile file = createFileWithOriginalFilename(supportedExtensionFileName);
+                    void It_response400() throws Exception {
+                        MockMultipartFile file = TestCsvUserListFileFactory.create();
 
                         ResultActions action = mockMvc.perform(
                                 requestBuilder
@@ -328,19 +294,10 @@ class TransactionalMailControllerTest {
                     this.existPublishName = existPublishName;
                 }
 
-                @ParameterizedTest
-                @ValueSource(strings = {
-                        "a.csv",
-                        "b.xlsx",
-                        "c.xls",
-                        "d.txt",
-                        "e",
-                        ".csv",
-                })
-                @NullAndEmptySource
+                @Test
                 @DisplayName("403을 응답한다")
-                void It_response403(String filename) throws Exception {
-                    MockMultipartFile file = createFileWithOriginalFilename(filename);
+                void It_response403() throws Exception {
+                    MockMultipartFile file = TestCsvUserListFileFactory.create();
 
                     ResultActions action = mockMvc.perform(
                             requestBuilder

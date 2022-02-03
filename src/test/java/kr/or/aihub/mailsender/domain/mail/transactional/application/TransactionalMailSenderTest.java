@@ -7,6 +7,7 @@ import kr.or.aihub.mailsender.domain.mail.transactional.dto.TemplateSendResponse
 import kr.or.aihub.mailsender.domain.mail.transactional.dto.TemplatesResponse;
 import kr.or.aihub.mailsender.domain.mail.transactional.errors.NotExistPublishNameException;
 import kr.or.aihub.mailsender.domain.mail.transactional.errors.NotSupportedFileExtensionException;
+import kr.or.aihub.mailsender.global.utils.application.MailUserCsvConvertor;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -31,12 +32,13 @@ import static org.mockito.Mockito.mock;
 @DisplayName("TransactionalMailSender 클래스")
 class TransactionalMailSenderTest {
     private final MandrillService mandrillService = mock(MandrillService.class);
+    private final MailUserCsvConvertor mailUserCsvConvertor = new MailUserCsvConvertor();
 
     private TransactionalMailSender transactionalMailSender;
 
     @BeforeEach
     void setUp() {
-        this.transactionalMailSender = new TransactionalMailSender(mandrillService);
+        this.transactionalMailSender = new TransactionalMailSender(mandrillService, mailUserCsvConvertor);
     }
 
     @Nested
