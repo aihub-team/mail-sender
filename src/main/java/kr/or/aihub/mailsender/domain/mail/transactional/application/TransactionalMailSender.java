@@ -12,9 +12,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
-import java.util.Arrays;
 import java.util.List;
-import java.util.Optional;
 
 /**
  * Transactional 메일 발송 담당.
@@ -44,9 +42,6 @@ public class TransactionalMailSender {
         checkExist(publishName);
 
         MultipartFile userListFile = templateSendRequest.getUserListFile();
-        checkNull(userListFile);
-        checkSupportedExtension(userListFile);
-
         List<MailUser> mailUsers = csvMailUserConvertor.convert(userListFile);
 
         return mandrillService.sendWithTemplate(publishName, mailUsers);
@@ -70,45 +65,4 @@ public class TransactionalMailSender {
         }
     }
 
-    private void checkNull(MultipartFile file) {
-        if (file == null) {
-            throw new IllegalArgumentException("file은 비어있을 수 없습니다.");
-        }
-    }
-
-    /**
-     * 지원되는 확장자인지 확인합니다.
-     *
-     * @param file 파일
-     * @throws NotSupportedFileExtensionException 지원되지 않는 확장자일 경우
-     */
-    private void checkSupportedExtension(MultipartFile file) {
-        String originalFilename = file.getOriginalFilename();
-        checkNullOrBlank(originalFilename);
-
-        String extension = getExtension(originalFilename)
-                .orElseThrow(IllegalArgumentException::new);
-
-        if (!"csv".equals(extension)) {
-            throw new NotSupportedFileExtensionException(extension);
-        }
-    }
-
-    /**
-     * 비거나 null인지 확인합니다.
-     *
-     * @param originalFilename 파일이름
-     * @throws IllegalArgumentException 비거나 null인 경우
-     */
-    private void checkNullOrBlank(String originalFilename) {
-        if (originalFilename == null || originalFilename.isBlank()) {
-            throw new IllegalArgumentException("파일이름은 비어있을 수 없습니다.");
-        }
-    }
-
-    private Optional<String> getExtension(String originalFilename) {
-        return Arrays.stream(originalFilename.split("\\."))
-                .skip(1)
-                .reduce((first, second) -> second);
-    }
 }
