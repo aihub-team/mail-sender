@@ -18,8 +18,6 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.authentication.HttpStatusEntryPoint;
 
 import javax.servlet.Filter;
-import java.util.Optional;
-import java.util.stream.Stream;
 
 @Configuration
 @EnableGlobalMethodSecurity(securedEnabled = true, prePostEnabled = true)
@@ -33,7 +31,8 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
             JwtCredentialDecoder jwtCredentialDecoder,
             UserRepository userRepository,
             RoleRepository roleRepository,
-            Environment environment) {
+            Environment environment
+    ) {
         this.jwtCredentialDecoder = jwtCredentialDecoder;
         this.userRepository = userRepository;
         this.roleRepository = roleRepository;
@@ -83,14 +82,13 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     private boolean isTestProfile() {
         String[] activeProfiles = environment.getActiveProfiles();
 
-        Optional<String> lastProfile = Stream.of(activeProfiles)
-                .reduce((a, b) -> b);
-
-        if (lastProfile.isEmpty()) {
+        if (activeProfiles.length == 0) {
             return false;
         }
 
-        return "test".equals(lastProfile.get());
+        String lastActiveProfile = activeProfiles[activeProfiles.length - 1];
+
+        return "test".equals(lastActiveProfile);
     }
 
     @Bean
