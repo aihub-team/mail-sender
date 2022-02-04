@@ -20,10 +20,16 @@ import java.util.List;
 public class RoleAddService {
     private final UserRepository userRepository;
     private final RoleRepository roleRepository;
+    private final RoleFinder roleFinder;
 
-    public RoleAddService(UserRepository userRepository, RoleRepository roleRepository) {
+    public RoleAddService(
+            UserRepository userRepository,
+            RoleRepository roleRepository,
+            RoleFinder roleFinder
+    ) {
         this.userRepository = userRepository;
         this.roleRepository = roleRepository;
+        this.roleFinder = roleFinder;
     }
 
     /**
@@ -36,23 +42,22 @@ public class RoleAddService {
      * @throws DeactivateUserException     비활성화된 유저가 어드민 권한을 요청한 경우
      */
     public RoleType add(Long userId, RoleAddRequest roleAddRequest) {
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new UserNotFoundException(userId));
+        List<Role> userRoles = roleFinder.findBy(userId);
 
-        List<Role> userRoles = roleRepository.findAllByUser(user);
         RoleType requestRoleType = roleAddRequest.getRoleType();
-
         checkAlreadyGranted(userRoles, requestRoleType);
-
         checkDeactivateUserRequestAdminRole(userRoles, requestRoleType);
 
-        Role role = createRole(user, requestRoleType);
+        Role role = createRole(userId, requestRoleType);
         roleRepository.save(role);
 
         return role.getType();
     }
 
-    private Role createRole(User user, RoleType requestRoleType) {
+    private Role createRole(Long userId, RoleType requestRoleType) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new UserNotFoundException(userId));
+
         return Role.builder()
                 .user(user)
                 .type(requestRoleType)
