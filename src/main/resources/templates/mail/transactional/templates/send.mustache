@@ -16,7 +16,7 @@
 >
 
     <p>보낼 템플릿 </p>
-    <select>
+    <select name="publishName">
         {{ #templates }}
         <option value="{{ publishName }}"> {{ publishName }} </option>
         {{ /templates }}
@@ -26,7 +26,7 @@
     <input
             name="file"
             type="file"
-            accept=".xlsx, .csv"
+            accept=".csv"
             required
     />
 

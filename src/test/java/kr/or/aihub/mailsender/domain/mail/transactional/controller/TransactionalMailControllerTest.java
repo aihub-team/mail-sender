@@ -1,91 +1,79 @@
 package kr.or.aihub.mailsender.domain.mail.transactional.controller;
 
-import kr.or.aihub.mailsender.domain.role.TestRoleFactory;
-import kr.or.aihub.mailsender.domain.role.domain.Role;
-import kr.or.aihub.mailsender.domain.role.domain.RoleRepository;
-import kr.or.aihub.mailsender.domain.role.domain.RoleType;
-import kr.or.aihub.mailsender.domain.user.TestUserFactory;
-import kr.or.aihub.mailsender.domain.user.domain.User;
-import kr.or.aihub.mailsender.domain.user.domain.UserRepository;
-import kr.or.aihub.mailsender.global.utils.application.JwtCredentialEncoder;
+import com.microtripit.mandrillapp.lutung.model.MandrillApiError;
+import kr.or.aihub.mailsender.domain.mail.transactional.application.MandrillService;
+import kr.or.aihub.mailsender.domain.mail.transactional.domain.MailUser;
+import kr.or.aihub.mailsender.domain.mail.transactional.dto.TemplateSendResponse;
+import kr.or.aihub.mailsender.domain.mail.transactional.dto.TemplatesResponse;
+import kr.or.aihub.mailsender.global.config.security.WithMockCustomActivateUser;
+import kr.or.aihub.mailsender.global.config.security.WithMockCustomDeactivateUser;
+import kr.or.aihub.mailsender.global.utils.TestCsvUserListFileFactory;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.NullAndEmptySource;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.http.MediaType;
+import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
+import org.springframework.test.web.servlet.request.MockMultipartHttpServletRequestBuilder;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
+import java.io.IOException;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+
+import static org.mockito.ArgumentMatchers.anyList;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.BDDMockito.given;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrl;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @SpringBootTest
 @AutoConfigureMockMvc
 @DisplayName("TransactionalMailController 클래스")
 class TransactionalMailControllerTest {
+    private static final String PREFIX_URL = "/mail/transactional";
 
     @Autowired
     private MockMvc mockMvc;
 
-    @Autowired
-    private PasswordEncoder passwordEncoder;
-
-    @Autowired
-    private UserRepository userRepository;
-
-    @Autowired
-    private RoleRepository roleRepository;
-
-    @Autowired
-    private JwtCredentialEncoder jwtCredentialEncoder;
-
-    private void saveDeactivateRole(User user) {
-        Role deactivateRole = TestRoleFactory.create(user, RoleType.ROLE_DEACTIVATE);
-
-        roleRepository.save(deactivateRole);
-    }
-
-    private void saveActivateRole(User user) {
-        Role activateRole = TestRoleFactory.create(user, RoleType.ROLE_ACTIVATE);
-
-        roleRepository.save(activateRole);
-    }
+    @MockBean
+    private MandrillService mandrillService;
 
     @Nested
     @DisplayName("GET /mail/transactional/templates/send 요청은")
     class Describe_mailTransactionalTemplatesSend {
         private final MockHttpServletRequestBuilder requestBuilder =
-                MockMvcRequestBuilders.get("/mail/transactional/templates/send");
+                MockMvcRequestBuilders.get(PREFIX_URL + "/templates/send");
 
         @Nested
         @DisplayName("인증된 유저일 경우")
+        @WithMockCustomActivateUser
         class Context_activateUser {
-            private User activateUser;
 
             @BeforeEach
-            void setUp() {
-                User user = TestUserFactory.create(passwordEncoder);
-                userRepository.save(user);
-
-                saveDeactivateRole(user);
-                saveActivateRole(user);
-
-                this.activateUser = user;
+            void setUp() throws MandrillApiError, IOException {
+                given(mandrillService.getTemplates())
+                        .willReturn(Arrays.asList(
+                                new TemplatesResponse("publishName")
+                        ));
             }
 
             @Test
             @DisplayName("200을 응답한다")
             void It_response200() throws Exception {
-                String jwtCredential = jwtCredentialEncoder.encode(activateUser.getId());
-
                 ResultActions action = mockMvc.perform(
                         requestBuilder
-                                .header(
-                                        "Authorization", "Bearer " + jwtCredential)
                 );
 
                 action
@@ -95,27 +83,14 @@ class TransactionalMailControllerTest {
 
         @Nested
         @DisplayName("인증되지 않은 유저일 경우")
+        @WithMockCustomDeactivateUser
         class Context_deactivateUser {
-            private User deactivateUser;
-
-            @BeforeEach
-            void setUp() {
-                User user = TestUserFactory.create(passwordEncoder);
-                userRepository.save(user);
-
-                saveDeactivateRole(user);
-
-                this.deactivateUser = user;
-            }
 
             @Test
             @DisplayName("403을 응답한다")
             void It_response403() throws Exception {
-                String jwtCredential = jwtCredentialEncoder.encode(deactivateUser.getId());
-
                 ResultActions action = mockMvc.perform(
                         requestBuilder
-                                .header("Authorization", "Bearer " + jwtCredential)
                 );
 
                 action
@@ -123,5 +98,241 @@ class TransactionalMailControllerTest {
             }
         }
 
+    }
+
+    @Nested
+    @DisplayName("POST /mail/transactional/templates/send 요청은")
+    class Describe_postMailTransactionalTemplatesSend {
+        private final MockMultipartHttpServletRequestBuilder requestBuilder =
+                MockMvcRequestBuilders.multipart(PREFIX_URL + "/templates/send");
+
+        @Nested
+        @DisplayName("활성화된 유저이고")
+        @WithMockCustomActivateUser
+        class Context_activateUser {
+
+            @Nested
+            @DisplayName("null이거나 빈 발행 이름일 경우")
+            class Context_nullOrEmptyPublishName {
+
+                @ParameterizedTest
+                @NullAndEmptySource
+                @DisplayName("400을 응답한다")
+                void It_response400(String nullOrEmptyPublishName) throws Exception {
+                    MockMultipartFile file = TestCsvUserListFileFactory.create();
+
+                    ResultActions action = mockMvc.perform(
+                            requestBuilder
+                                    .file(file)
+                                    .param("publishName", nullOrEmptyPublishName)
+                                    .contentType(MediaType.MULTIPART_FORM_DATA)
+                    );
+
+                    action
+                            .andExpect(status().isBadRequest());
+                }
+            }
+
+            @Nested
+            @DisplayName("존재하지 않는 발행 이름일 경우")
+            class Context_notExistPublishName {
+                private String notExistPublishName;
+
+                @BeforeEach
+                void setUp() throws MandrillApiError, IOException {
+                    given(mandrillService.getTemplates()).willReturn(
+                            Collections.emptyList()
+                    );
+
+                    this.notExistPublishName = "notExistPublishName";
+                }
+
+                @Test
+                @DisplayName("400을 응답한다")
+                void It_response400() throws Exception {
+                    MockMultipartFile file = TestCsvUserListFileFactory.create();
+
+                    ResultActions action = mockMvc.perform(
+                            requestBuilder
+                                    .file(file)
+                                    .param("publishName", notExistPublishName)
+                                    .contentType(MediaType.MULTIPART_FORM_DATA)
+                    );
+
+                    action
+                            .andExpect(status().isBadRequest());
+                }
+
+            }
+
+            @Nested
+            @DisplayName("존재하는 발행 이름이고")
+            class Context_existPublishName {
+                private String existPublishName;
+
+                @BeforeEach
+                void setUp() throws MandrillApiError, IOException {
+                    String existPublishName = "existPublishName";
+
+                    given(mandrillService.getTemplates()).willReturn(
+                            Arrays.asList(
+                                    new TemplatesResponse(existPublishName)
+                            )
+                    );
+
+                    given(mandrillService.sendWithTemplate(eq(existPublishName), anyList()))
+                            .will(invocation -> {
+                                List<MailUser> mailUsers = invocation.getArgument(1);
+                                MailUser mailUser = mailUsers.get(0);
+
+                                return Arrays.asList(
+                                        TemplateSendResponse.builder()
+                                                .email(mailUser.getEmail())
+                                                .status("sent")
+                                                .build()
+                                );
+                            });
+
+                    this.existPublishName = existPublishName;
+                }
+
+                @Nested
+                @DisplayName("지원하는 확장자 파일 이름일 경우")
+                class Context_supportedExtensionFileNames {
+
+                    @ParameterizedTest
+                    @ValueSource(strings = {
+                            "a.csv",
+                            " .csv"
+                    })
+                    @DisplayName("303을 응답하고 조회 페이지로 리다이렉트 된다")
+                    void It_response303AndRedirectGetPage(String supportedExtensionFileName) throws Exception {
+                        MockMultipartFile file = TestCsvUserListFileFactory.create(supportedExtensionFileName);
+
+                        ResultActions action = mockMvc.perform(
+                                requestBuilder
+                                        .file(file)
+                                        .param("publishName", existPublishName)
+                                        .contentType(MediaType.MULTIPART_FORM_DATA)
+                        );
+
+                        action
+                                .andExpect(status().isSeeOther())
+                                .andExpect(redirectedUrl(PREFIX_URL + "/templates/send"));
+                    }
+                }
+
+                @Nested
+                @DisplayName("비거나 null인 파일 이름일 경우")
+                class Context_emptyOrNullFileName {
+
+                    @ParameterizedTest
+                    @NullAndEmptySource
+                    @DisplayName("400을 응답한다")
+                    void It_response400(String emptyOrNullFileName) throws Exception {
+                        MockMultipartFile file = TestCsvUserListFileFactory.create(emptyOrNullFileName);
+
+                        ResultActions action = mockMvc.perform(
+                                requestBuilder
+                                        .file(file)
+                                        .param("publishName", existPublishName)
+                                        .contentType(MediaType.MULTIPART_FORM_DATA)
+                        );
+
+                        action
+                                .andExpect(status().isBadRequest());
+                    }
+                }
+
+                @Nested
+                @DisplayName("지원하지 않는 확장자 파일 이름일 경우")
+                class Context_notSupportedExtensionFileNames {
+
+                    @ParameterizedTest
+                    @ValueSource(strings = {
+                            "a.xlsx",
+                            "b.xls",
+                            "c.txt"
+                    })
+                    @DisplayName("400을 응답한다")
+                    void It_response400(String notSupportedExtensionFileName) throws Exception {
+                        MockMultipartFile file = TestCsvUserListFileFactory.create(notSupportedExtensionFileName);
+
+                        ResultActions action = mockMvc.perform(
+                                requestBuilder
+                                        .file(file)
+                                        .param("publishName", existPublishName)
+                                        .contentType(MediaType.MULTIPART_FORM_DATA)
+                        );
+
+                        action
+                                .andExpect(status().isBadRequest());
+                    }
+                }
+
+                @Nested
+                @DisplayName("확장자가 없는 파일 이름일 경우")
+                class Context_noExtensionFilename {
+
+                    @ParameterizedTest
+                    @ValueSource(strings = {
+                            "e"
+                    })
+                    @DisplayName("400을 응답한다")
+                    void It_response400(String noExtensionFilename) throws Exception {
+                        MockMultipartFile file = TestCsvUserListFileFactory.create(noExtensionFilename);
+
+                        ResultActions action = mockMvc.perform(
+                                requestBuilder
+                                        .file(file)
+                                        .param("publishName", existPublishName)
+                                        .contentType(MediaType.MULTIPART_FORM_DATA)
+                        );
+
+                        action
+                                .andExpect(status().isBadRequest());
+                    }
+                }
+
+
+            }
+
+        }
+
+        @Nested
+        @DisplayName("비활성화된 유저일경우")
+        @WithMockCustomDeactivateUser
+        class Context_deactivateUser {
+            private String existPublishName;
+
+            @BeforeEach
+            void setUp() throws MandrillApiError, IOException {
+                String existPublishName = "existPublishName";
+
+                given(mandrillService.getTemplates()).willReturn(
+                        Arrays.asList(
+                                new TemplatesResponse(existPublishName)
+                        )
+                );
+
+                this.existPublishName = existPublishName;
+            }
+
+            @Test
+            @DisplayName("403을 응답한다")
+            void It_response403() throws Exception {
+                MockMultipartFile file = TestCsvUserListFileFactory.create();
+
+                ResultActions action = mockMvc.perform(
+                        requestBuilder
+                                .file(file)
+                                .param("publishName", existPublishName)
+                                .contentType(MediaType.MULTIPART_FORM_DATA)
+                );
+
+                action
+                        .andExpect(status().isForbidden());
+            }
+        }
     }
 }

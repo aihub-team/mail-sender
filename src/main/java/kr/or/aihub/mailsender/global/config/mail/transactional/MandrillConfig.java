@@ -1,5 +1,6 @@
 package kr.or.aihub.mailsender.global.config.mail.transactional;
 
+import com.microtripit.mandrillapp.lutung.controller.MandrillMessagesApi;
 import com.microtripit.mandrillapp.lutung.controller.MandrillTemplatesApi;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -16,5 +17,10 @@ public class MandrillConfig {
     @Bean
     public MandrillTemplatesApi mandrillTemplatesApi() {
         return new MandrillTemplatesApi(key);
+    }
+
+    @Bean
+    public MandrillMessagesApi mandrillMessagesApi() {
+        return new MandrillMessagesApi(key);
     }
 }
