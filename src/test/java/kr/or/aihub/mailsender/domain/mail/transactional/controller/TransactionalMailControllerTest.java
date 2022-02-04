@@ -112,6 +112,38 @@ class TransactionalMailControllerTest {
         class Context_activateUser {
 
             @Nested
+            @DisplayName("존재하지 않는 발행 이름일 경우")
+            class Context_notExistPublishName {
+                private String notExistPublishName;
+
+                @BeforeEach
+                void setUp() throws MandrillApiError, IOException {
+                    given(mandrillService.getTemplates()).willReturn(
+                            Collections.emptyList()
+                    );
+
+                    this.notExistPublishName = "notExistPublishName";
+                }
+
+                @Test
+                @DisplayName("400을 응답한다")
+                void It_response400() throws Exception {
+                    MockMultipartFile file = TestCsvUserListFileFactory.create();
+
+                    ResultActions action = mockMvc.perform(
+                            requestBuilder
+                                    .file(file)
+                                    .param("publishName", notExistPublishName)
+                                    .contentType(MediaType.MULTIPART_FORM_DATA)
+                    );
+
+                    action
+                            .andExpect(status().isBadRequest());
+                }
+
+            }
+
+            @Nested
             @DisplayName("존재하는 발행 이름이고")
             class Context_existPublishName {
                 private String existPublishName;
@@ -241,76 +273,44 @@ class TransactionalMailControllerTest {
                 }
 
 
-                @Nested
-                @DisplayName("존재하지 않는 발행 이름일 경우")
-                class Context_notExistPublishName {
-                    private String notExistPublishName;
-
-                    @BeforeEach
-                    void setUp() throws MandrillApiError, IOException {
-                        given(mandrillService.getTemplates()).willReturn(
-                                Collections.emptyList()
-                        );
-
-                        this.notExistPublishName = "notExistPublishName";
-                    }
-
-                    @Test
-                    @DisplayName("400을 응답한다")
-                    void It_response400() throws Exception {
-                        MockMultipartFile file = TestCsvUserListFileFactory.create();
-
-                        ResultActions action = mockMvc.perform(
-                                requestBuilder
-                                        .file(file)
-                                        .param("publishName", notExistPublishName)
-                                        .contentType(MediaType.MULTIPART_FORM_DATA)
-                        );
-
-                        action
-                                .andExpect(status().isBadRequest());
-                    }
-
-                }
-
             }
 
-            @Nested
-            @DisplayName("비활성화된 유저일경우")
-            @WithMockCustomDeactivateUser
-            class Context_deactivateUser {
-                private String existPublishName;
+        }
 
-                @BeforeEach
-                void setUp() throws MandrillApiError, IOException {
-                    String existPublishName = "existPublishName";
+        @Nested
+        @DisplayName("비활성화된 유저일경우")
+        @WithMockCustomDeactivateUser
+        class Context_deactivateUser {
+            private String existPublishName;
 
-                    given(mandrillService.getTemplates()).willReturn(
-                            Arrays.asList(
-                                    new TemplatesResponse(existPublishName)
-                            )
-                    );
+            @BeforeEach
+            void setUp() throws MandrillApiError, IOException {
+                String existPublishName = "existPublishName";
 
-                    this.existPublishName = existPublishName;
-                }
+                given(mandrillService.getTemplates()).willReturn(
+                        Arrays.asList(
+                                new TemplatesResponse(existPublishName)
+                        )
+                );
 
-                @Test
-                @DisplayName("403을 응답한다")
-                void It_response403() throws Exception {
-                    MockMultipartFile file = TestCsvUserListFileFactory.create();
-
-                    ResultActions action = mockMvc.perform(
-                            requestBuilder
-                                    .file(file)
-                                    .param("publishName", existPublishName)
-                                    .contentType(MediaType.MULTIPART_FORM_DATA)
-                    );
-
-                    action
-                            .andExpect(status().isForbidden());
-                }
+                this.existPublishName = existPublishName;
             }
 
+            @Test
+            @DisplayName("403을 응답한다")
+            void It_response403() throws Exception {
+                MockMultipartFile file = TestCsvUserListFileFactory.create();
+
+                ResultActions action = mockMvc.perform(
+                        requestBuilder
+                                .file(file)
+                                .param("publishName", existPublishName)
+                                .contentType(MediaType.MULTIPART_FORM_DATA)
+                );
+
+                action
+                        .andExpect(status().isForbidden());
+            }
         }
     }
 }
