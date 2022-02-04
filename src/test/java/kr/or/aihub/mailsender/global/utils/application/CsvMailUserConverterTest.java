@@ -1,16 +1,12 @@
 package kr.or.aihub.mailsender.global.utils.application;
 
 import kr.or.aihub.mailsender.domain.mail.transactional.domain.MailUser;
-import kr.or.aihub.mailsender.domain.mail.transactional.errors.NotSupportedFileExtensionException;
 import kr.or.aihub.mailsender.global.utils.TestCsvUserListFileFactory;
 import kr.or.aihub.mailsender.global.utils.errors.FileParsingException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.NullSource;
-import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -71,36 +67,6 @@ public class CsvMailUserConverterTest {
             }
         }
 
-        @Nested
-        @DisplayName("null 파일이 주어지는 경우")
-        class Context_nullFile {
 
-            @ParameterizedTest
-            @NullSource
-            @DisplayName("IllegalArgumentExcpetion을 던진다")
-            void It_throwsIllegalArgumentException(MultipartFile nullFile) {
-                assertThatThrownBy(() -> csvMailUserConverter.convert(nullFile))
-                        .isInstanceOf(IllegalArgumentException.class);
-            }
-        }
-
-        @Nested
-        @DisplayName("csv가 아닌 확장자가 주어지는 경우")
-        class Context_notCsvExtensionFile {
-
-            @ParameterizedTest
-            @ValueSource(strings = {
-                    "a.xlsx",
-                    "b.xls",
-                    "c.txt"
-            })
-            @DisplayName("예외를 던진다")
-            void It_throwsException(String notCsvExtensionFilename) {
-                MultipartFile notCsvExtensionUserListFile = TestCsvUserListFileFactory.create(notCsvExtensionFilename);
-
-                assertThatThrownBy(() -> csvMailUserConverter.convert(notCsvExtensionUserListFile))
-                        .isInstanceOf(NotSupportedFileExtensionException.class);
-            }
-        }
     }
 }

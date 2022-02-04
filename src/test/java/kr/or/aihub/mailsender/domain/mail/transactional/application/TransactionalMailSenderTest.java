@@ -6,18 +6,13 @@ import kr.or.aihub.mailsender.domain.mail.transactional.dto.TemplateSendRequest;
 import kr.or.aihub.mailsender.domain.mail.transactional.dto.TemplateSendResponse;
 import kr.or.aihub.mailsender.domain.mail.transactional.dto.TemplatesResponse;
 import kr.or.aihub.mailsender.domain.mail.transactional.errors.NotExistPublishNameException;
-import kr.or.aihub.mailsender.domain.mail.transactional.errors.NotSupportedFileExtensionException;
 import kr.or.aihub.mailsender.global.utils.TestCsvUserListFileFactory;
 import kr.or.aihub.mailsender.global.utils.application.CsvMailUserConverter;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.NullAndEmptySource;
-import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.mock.web.MockMultipartFile;
-import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.util.Arrays;
@@ -86,103 +81,37 @@ class TransactionalMailSenderTest {
                 given(mandrillService.getTemplates())
                         .willReturn(Arrays.asList(new TemplatesResponse(existPublishName)));
 
+                given(mandrillService.sendWithTemplate(eq(existPublishName), anyList()))
+                        .will(invocation -> {
+                            List<MailUser> mailUsers = invocation.getArgument(1);
+                            MailUser mailUser = mailUsers.get(0);
+
+                            return Arrays.asList(
+                                    TemplateSendResponse.builder()
+                                            .email(mailUser.getEmail())
+                                            .status("sent")
+                                            .build()
+                            );
+                        });
+
                 this.existPublishName = existPublishName;
             }
 
+            @Test
+            @DisplayName("발송 결과를 리턴한다")
+            void It_doesNotThrowAnyException() throws MandrillApiError, IOException {
+                MockMultipartFile userListFile = TestCsvUserListFileFactory.create();
 
-            @Nested
-            @DisplayName("file 이름이 지원하는 확장자가 아닌 경우")
-            class Context_notSupportedExtensionFilenames {
+                List<TemplateSendResponse> templateSendResponses
+                        = transactionalMailSender.sendTemplate(new TemplateSendRequest(userListFile, existPublishName));
 
-                @ParameterizedTest
-                @ValueSource(strings = {
-                        "a.xlsx",
-                        "b.xls",
-                        "c.txt"
-                })
-                @DisplayName("NotSupportedFileExtensionException을 던진다")
-                void It_throwsNotSupportedFileExtensionException(String notSupportedExtensionFilename) {
-                    MultipartFile notSupportedExtensionFile = TestCsvUserListFileFactory.create(notSupportedExtensionFilename);
+                assertThat(templateSendResponses).isNotNull();
 
-                    assertThatThrownBy(() -> {
-                        transactionalMailSender.sendTemplate(new TemplateSendRequest(notSupportedExtensionFile, existPublishName));
-                    }).isInstanceOf(NotSupportedFileExtensionException.class);
-                }
-            }
-
-            @Nested
-            @DisplayName("file 이름 확장자가 없는 경우")
-            class Context_noExtensionFilename {
-
-                @ParameterizedTest
-                @ValueSource(strings = {
-                        "a"
-                })
-                @DisplayName("IllegalArgumentException을 던진다")
-                void It_throwsIllegalArgumentException(String noExtensionFilename) {
-                    MockMultipartFile noExtensionFile = TestCsvUserListFileFactory.create(noExtensionFilename);
-
-                    assertThatThrownBy(() ->
-                            transactionalMailSender.sendTemplate(new TemplateSendRequest(noExtensionFile, existPublishName))
-                    ).isInstanceOf(IllegalArgumentException.class);
-                }
-            }
-
-            @Nested
-            @DisplayName("file 이름 확장자가 비거나 널 값인 경우")
-            class Context_emptyOrNullFilename {
-
-                @ParameterizedTest
-                @NullAndEmptySource
-                @DisplayName("IllegalArgumentException을 던진다")
-                void It_throwsIllegalArgumentException(String emptyOrNullFilename) {
-                    MockMultipartFile emptyFile = TestCsvUserListFileFactory.create(emptyOrNullFilename);
-
-                    assertThatThrownBy(() ->
-                            transactionalMailSender.sendTemplate(new TemplateSendRequest(emptyFile, existPublishName))
-                    ).isInstanceOf(IllegalArgumentException.class);
-                }
-            }
-
-            @Nested
-            @DisplayName("file 이름이 지원하는 확장자일 경우")
-            class Context_supportedExtensionFilename {
-
-                @BeforeEach
-                void setUp() throws MandrillApiError, IOException {
-                    given(mandrillService.sendWithTemplate(eq(existPublishName), anyList()))
-                            .will(invocation -> {
-                                List<MailUser> mailUsers = invocation.getArgument(1);
-                                MailUser mailUser = mailUsers.get(0);
-
-                                return Arrays.asList(
-                                        TemplateSendResponse.builder()
-                                                .email(mailUser.getEmail())
-                                                .status("sent")
-                                                .build()
-                                );
-                            });
-                }
-
-                @ParameterizedTest
-                @ValueSource(strings = {
-                        "a.csv"
-                })
-                @DisplayName("발송 결과를 리턴한다")
-                void It_doesNotThrowAnyException(String supportedExtensionFilename) throws MandrillApiError, IOException {
-                    MockMultipartFile supportedExtensionFile = TestCsvUserListFileFactory.create(supportedExtensionFilename);
-
-                    List<TemplateSendResponse> templateSendResponses
-                            = transactionalMailSender.sendTemplate(new TemplateSendRequest(supportedExtensionFile, existPublishName));
-
-                    assertThat(templateSendResponses).isNotNull();
-
-                    TemplateSendResponse templateSendResponse = templateSendResponses.get(0);
-                    assertThat(templateSendResponse.getEmail()).isEqualTo("jypark1@wise.co.kr");
-                    assertThat(templateSendResponse.getStatus()).isEqualTo("sent");
-                    assertThat(templateSendResponse.getRejectReason()).isNull();
-                    assertThat(templateSendResponse.getId()).isNull();
-                }
+                TemplateSendResponse templateSendResponse = templateSendResponses.get(0);
+                assertThat(templateSendResponse.getEmail()).isEqualTo("jypark1@wise.co.kr");
+                assertThat(templateSendResponse.getStatus()).isEqualTo("sent");
+                assertThat(templateSendResponse.getRejectReason()).isNull();
+                assertThat(templateSendResponse.getId()).isNull();
             }
         }
 

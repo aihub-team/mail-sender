@@ -14,6 +14,8 @@ import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
+import javax.validation.ConstraintViolationException;
+
 /**
  * 컨트롤러 전체 에러 핸들링을 담당합니다.
  */
@@ -100,4 +102,14 @@ public class GlobalControllerErrorAdvice {
     public ErrorResponse notSupportedFileExtensionExceptionHandler(NotSupportedFileExtensionException e) {
         return new ErrorResponse(e.getMessage());
     }
+
+    /**
+     * 제약 조건이 잘못된 경우를 처리합니다.
+     */
+    @ExceptionHandler(ConstraintViolationException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ErrorResponse constraintViolationExceptionHandler(ConstraintViolationException e) {
+        return new ErrorResponse(e.getMessage());
+    }
+
 }
