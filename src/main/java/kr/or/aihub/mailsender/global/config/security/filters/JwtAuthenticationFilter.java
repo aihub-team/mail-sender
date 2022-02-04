@@ -1,10 +1,7 @@
 package kr.or.aihub.mailsender.global.config.security.filters;
 
+import kr.or.aihub.mailsender.domain.role.application.RoleFinder;
 import kr.or.aihub.mailsender.domain.role.domain.Role;
-import kr.or.aihub.mailsender.domain.role.domain.RoleRepository;
-import kr.or.aihub.mailsender.domain.user.domain.User;
-import kr.or.aihub.mailsender.domain.user.domain.UserRepository;
-import kr.or.aihub.mailsender.domain.user.error.UserNotFoundException;
 import kr.or.aihub.mailsender.global.config.security.auth.UserAuthentication;
 import kr.or.aihub.mailsender.global.config.security.error.EmptyJwtCredentialException;
 import kr.or.aihub.mailsender.global.config.security.error.NotAllowedJwtTypeException;
@@ -27,19 +24,16 @@ import java.util.Optional;
  */
 public class JwtAuthenticationFilter extends BasicAuthenticationFilter {
     private final JwtCredentialDecoder jwtCredentialDecoder;
-    private final UserRepository userRepository;
-    private final RoleRepository roleRepository;
+    private final RoleFinder roleFinder;
 
     public JwtAuthenticationFilter(
             AuthenticationManager authenticationManager,
             JwtCredentialDecoder jwtCredentialDecoder,
-            UserRepository userRepository,
-            RoleRepository roleRepository
+            RoleFinder roleFinder
     ) {
         super(authenticationManager);
         this.jwtCredentialDecoder = jwtCredentialDecoder;
-        this.userRepository = userRepository;
-        this.roleRepository = roleRepository;
+        this.roleFinder = roleFinder;
     }
 
     @Override
@@ -49,9 +43,7 @@ public class JwtAuthenticationFilter extends BasicAuthenticationFilter {
         String jwtCredential = getJwtCredential(authorizationHttpRequestHeader);
 
         Long userId = (Long) jwtCredentialDecoder.decode(jwtCredential, "userId");
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new UserNotFoundException(userId));
-        List<Role> roles = roleRepository.findAllByUser(user);
+        List<Role> roles = roleFinder.findBy(userId);
 
         SecurityContext securityContext = SecurityContextHolder.getContext();
         securityContext.setAuthentication(new UserAuthentication(userId, roles));

@@ -1,7 +1,6 @@
 package kr.or.aihub.mailsender.global.config.security;
 
-import kr.or.aihub.mailsender.domain.role.domain.RoleRepository;
-import kr.or.aihub.mailsender.domain.user.domain.UserRepository;
+import kr.or.aihub.mailsender.domain.role.application.RoleFinder;
 import kr.or.aihub.mailsender.global.config.security.filters.ExceptionHandleFilter;
 import kr.or.aihub.mailsender.global.config.security.filters.JwtAuthenticationFilter;
 import kr.or.aihub.mailsender.global.utils.application.JwtCredentialDecoder;
@@ -23,20 +22,17 @@ import javax.servlet.Filter;
 @EnableGlobalMethodSecurity(securedEnabled = true, prePostEnabled = true)
 public class SecurityConfig extends WebSecurityConfigurerAdapter {
     private final JwtCredentialDecoder jwtCredentialDecoder;
-    private final UserRepository userRepository;
-    private final RoleRepository roleRepository;
     private final Environment environment;
+    private final RoleFinder roleFinder;
 
     public SecurityConfig(
             JwtCredentialDecoder jwtCredentialDecoder,
-            UserRepository userRepository,
-            RoleRepository roleRepository,
-            Environment environment
+            Environment environment,
+            RoleFinder roleFinder
     ) {
         this.jwtCredentialDecoder = jwtCredentialDecoder;
-        this.userRepository = userRepository;
-        this.roleRepository = roleRepository;
         this.environment = environment;
+        this.roleFinder = roleFinder;
     }
 
     @Override
@@ -51,8 +47,11 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     @Override
     protected void configure(HttpSecurity httpSecurity) throws Exception {
         Filter exceptionHandleFilter = new ExceptionHandleFilter();
-        Filter jwtAuthenticationFilter = new JwtAuthenticationFilter(authenticationManager(),
-                jwtCredentialDecoder, userRepository, roleRepository);
+        Filter jwtAuthenticationFilter = new JwtAuthenticationFilter(
+                authenticationManager(),
+                jwtCredentialDecoder,
+                roleFinder
+        );
 
         httpSecurity
                 .authorizeRequests()
