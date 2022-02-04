@@ -112,6 +112,28 @@ class TransactionalMailControllerTest {
         class Context_activateUser {
 
             @Nested
+            @DisplayName("null이거나 빈 발행 이름일 경우")
+            class Context_nullOrEmptyPublishName {
+
+                @ParameterizedTest
+                @NullAndEmptySource
+                @DisplayName("400을 응답한다")
+                void It_response400(String nullOrEmptyPublishName) throws Exception {
+                    MockMultipartFile file = TestCsvUserListFileFactory.create();
+
+                    ResultActions action = mockMvc.perform(
+                            requestBuilder
+                                    .file(file)
+                                    .param("publishName", nullOrEmptyPublishName)
+                                    .contentType(MediaType.MULTIPART_FORM_DATA)
+                    );
+
+                    action
+                            .andExpect(status().isBadRequest());
+                }
+            }
+
+            @Nested
             @DisplayName("존재하지 않는 발행 이름일 경우")
             class Context_notExistPublishName {
                 private String notExistPublishName;
