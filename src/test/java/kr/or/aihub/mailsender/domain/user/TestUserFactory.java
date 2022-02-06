@@ -7,8 +7,10 @@ import org.springframework.security.crypto.password.PasswordEncoder;
  * 테스트 유저 생성 담당.
  */
 public class TestUserFactory {
+    private static String DEFAULT_USERNAME = "username";
+    private static String DEFAULT_PASSWORD = "password";
 
     public static User create(PasswordEncoder passwordEncoder) {
-        return User.createWithPasswordEncoder("username", "password", passwordEncoder);
+        return User.createWithPasswordEncoder(DEFAULT_USERNAME, DEFAULT_PASSWORD, passwordEncoder);
     }
 }
