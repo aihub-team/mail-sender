@@ -3,7 +3,6 @@ package kr.or.aihub.mailsender.domain.user.application;
 import kr.or.aihub.mailsender.domain.role.domain.Role;
 import kr.or.aihub.mailsender.domain.role.domain.RoleRepository;
 import kr.or.aihub.mailsender.domain.role.domain.RoleType;
-import kr.or.aihub.mailsender.domain.user.TestUserFactory;
 import kr.or.aihub.mailsender.domain.user.domain.User;
 import kr.or.aihub.mailsender.domain.user.domain.UserRepository;
 import kr.or.aihub.mailsender.domain.user.dto.UserRegisterRequest;
@@ -96,7 +95,7 @@ public class UserRegisterServiceTest {
             void setUp() {
                 String username = "username";
                 String password = "password";
-                User user = TestUserFactory.create(username, password, passwordEncoder);
+                User user = User.createWithPasswordEncoder(username, password, passwordEncoder);
 
                 userRepository.save(user);
 

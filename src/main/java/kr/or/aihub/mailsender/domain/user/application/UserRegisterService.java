@@ -48,20 +48,13 @@ public class UserRegisterService {
         String username = userRegisterRequest.getUsername();
         checkExist(username);
 
-        User user = createUser(username, password);
+        User user = User.createWithPasswordEncoder(username, password, passwordEncoder);
         userRepository.save(user);
 
         Role role = createRole(user);
         roleRepository.save(role);
 
         return user;
-    }
-
-    private User createUser(String username, String password) {
-        return User.builder()
-                .username(username)
-                .password(passwordEncoder.encode(password))
-                .build();
     }
 
     private Role createRole(User user) {
