@@ -39,10 +39,9 @@ public class UserRegisterService {
      */
     public User registerUser(UserRegisterRequest userRegisterRequest) {
         checkPasswordMatchConfirmPassword(userRegisterRequest);
+        checkExistUsername(userRegisterRequest);
 
         String username = userRegisterRequest.getUsername();
-        checkExist(username);
-
         String password = userRegisterRequest.getPassword();
         User user = User.createWithPasswordEncoder(username, password, passwordEncoder);
         userRepository.save(user);
@@ -62,13 +61,16 @@ public class UserRegisterService {
     /**
      * 유저 이름이 존재하는지 확인합니다.
      *
-     * @param username 유저 이름
+     * @param userRegisterRequest 회원 가입 요청 데이터
      * @throws ExistUsernameException 유저이름이 존재할 경우
      */
-    private void checkExist(String username) {
+    private void checkExistUsername(UserRegisterRequest userRegisterRequest) {
+        String username = userRegisterRequest.getUsername();
+
         userRepository.findByUsername(username)
                 .ifPresent(user -> {
                     throw new ExistUsernameException(user.getUsername());
                 });
     }
+
 }
