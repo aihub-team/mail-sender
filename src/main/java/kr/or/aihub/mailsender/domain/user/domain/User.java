@@ -1,5 +1,6 @@
 package kr.or.aihub.mailsender.domain.user.domain;
 
+import kr.or.aihub.mailsender.domain.user.dto.UserRegisterRequest;
 import lombok.Builder;
 import lombok.Getter;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -42,4 +43,10 @@ public class User {
                 .build();
     }
 
+    public static User createWithPasswordEncoder(UserRegisterRequest userRegisterRequest, PasswordEncoder passwordEncoder) {
+        String username = userRegisterRequest.getUsername();
+        String password = userRegisterRequest.getPassword();
+
+        return createWithPasswordEncoder(username, password, passwordEncoder);
+    }
 }
