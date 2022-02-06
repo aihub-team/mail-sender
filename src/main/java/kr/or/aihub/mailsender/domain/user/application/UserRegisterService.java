@@ -10,8 +10,6 @@ import kr.or.aihub.mailsender.domain.user.error.ExistUsernameException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import java.util.Objects;
-
 /**
  * 유저 회원가입 처리 담당.
  */
@@ -40,13 +38,12 @@ public class UserRegisterService {
      * @throws ConfirmPasswordNotMatchException 비밀번호 확인이 틀릴 경우
      */
     public User registerUser(UserRegisterRequest userRegisterRequest) {
-        String password = userRegisterRequest.getPassword();
-        String confirmPassword = userRegisterRequest.getConfirmPassword();
-        checkMatch(password, confirmPassword);
+        checkPasswordMatchConfirmPassword(userRegisterRequest);
 
         String username = userRegisterRequest.getUsername();
         checkExist(username);
 
+        String password = userRegisterRequest.getPassword();
         User user = User.createWithPasswordEncoder(username, password, passwordEncoder);
         userRepository.save(user);
 
@@ -56,15 +53,8 @@ public class UserRegisterService {
         return user;
     }
 
-    /**
-     * 비밀번호 확인이 일치한지 검사합니다.
-     *
-     * @param password        비밀번호
-     * @param confirmPassword 비밀번호 확인
-     * @throws ConfirmPasswordNotMatchException 비밀번호 확인이 틀릴 경우
-     */
-    private void checkMatch(String password, String confirmPassword) {
-        if (!Objects.equals(password, confirmPassword)) {
+    private void checkPasswordMatchConfirmPassword(UserRegisterRequest userRegisterRequest) {
+        if (!userRegisterRequest.matchPassword()) {
             throw new ConfirmPasswordNotMatchException();
         }
     }
