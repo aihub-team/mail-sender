@@ -2,7 +2,6 @@ package kr.or.aihub.mailsender.domain.user.application;
 
 import kr.or.aihub.mailsender.domain.role.domain.Role;
 import kr.or.aihub.mailsender.domain.role.domain.RoleRepository;
-import kr.or.aihub.mailsender.domain.role.domain.RoleType;
 import kr.or.aihub.mailsender.domain.user.domain.User;
 import kr.or.aihub.mailsender.domain.user.domain.UserRepository;
 import kr.or.aihub.mailsender.domain.user.dto.UserRegisterRequest;
@@ -51,17 +50,10 @@ public class UserRegisterService {
         User user = User.createWithPasswordEncoder(username, password, passwordEncoder);
         userRepository.save(user);
 
-        Role role = createRole(user);
+        Role role = Role.create(user);
         roleRepository.save(role);
 
         return user;
-    }
-
-    private Role createRole(User user) {
-        return Role.builder()
-                .user(user)
-                .type(RoleType.ROLE_DEACTIVATE)
-                .build();
     }
 
     /**

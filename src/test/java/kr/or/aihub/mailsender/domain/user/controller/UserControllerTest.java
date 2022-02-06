@@ -1,7 +1,6 @@
 package kr.or.aihub.mailsender.domain.user.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import kr.or.aihub.mailsender.domain.role.TestRoleFactory;
 import kr.or.aihub.mailsender.domain.role.domain.Role;
 import kr.or.aihub.mailsender.domain.role.domain.RoleRepository;
 import kr.or.aihub.mailsender.domain.role.domain.RoleType;
@@ -190,7 +189,7 @@ class UserControllerTest {
                             User user = User.createWithPasswordEncoder(username, password, passwordEncoder);
                             userRepository.save(user);
 
-                            Role role = TestRoleFactory.create(user, RoleType.ROLE_DEACTIVATE);
+                            Role role = Role.create(user, RoleType.ROLE_DEACTIVATE);
                             roleRepository.save(role);
 
                             deactivateLoginRequest = UserLoginRequest.builder()
@@ -225,7 +224,7 @@ class UserControllerTest {
                             User user = User.createWithPasswordEncoder(username, password, passwordEncoder);
                             userRepository.save(user);
 
-                            Role role = TestRoleFactory.create(user, RoleType.ROLE_ACTIVATE);
+                            Role role = Role.create(user, RoleType.ROLE_ACTIVATE);
                             roleRepository.save(role);
 
                             activateUserLoginRequest = UserLoginRequest.builder()

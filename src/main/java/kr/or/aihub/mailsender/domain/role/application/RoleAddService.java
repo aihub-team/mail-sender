@@ -58,10 +58,7 @@ public class RoleAddService {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new UserNotFoundException(userId));
 
-        return Role.builder()
-                .user(user)
-                .type(requestRoleType)
-                .build();
+        return Role.create(user, requestRoleType);
     }
 
     /**
