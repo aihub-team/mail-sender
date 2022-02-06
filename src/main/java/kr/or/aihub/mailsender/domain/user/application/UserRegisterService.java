@@ -41,9 +41,7 @@ public class UserRegisterService {
         checkPasswordMatchConfirmPassword(userRegisterRequest);
         checkExistUsername(userRegisterRequest);
 
-        String username = userRegisterRequest.getUsername();
-        String password = userRegisterRequest.getPassword();
-        User user = User.createWithPasswordEncoder(username, password, passwordEncoder);
+        User user = User.createWithPasswordEncoder(userRegisterRequest, passwordEncoder);
         userRepository.save(user);
 
         Role role = Role.create(user);

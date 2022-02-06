@@ -13,4 +13,8 @@ public class TestUserFactory {
     public static User create(PasswordEncoder passwordEncoder) {
         return User.createWithPasswordEncoder(DEFAULT_USERNAME, DEFAULT_PASSWORD, passwordEncoder);
     }
+
+    public static User create(String password, PasswordEncoder passwordEncoder) {
+        return User.createWithPasswordEncoder(DEFAULT_USERNAME, password, passwordEncoder);
+    }
 }
