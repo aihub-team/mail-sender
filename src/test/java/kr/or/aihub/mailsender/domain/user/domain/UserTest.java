@@ -1,5 +1,6 @@
 package kr.or.aihub.mailsender.domain.user.domain;
 
+import kr.or.aihub.mailsender.domain.user.TestUserFactory;
 import kr.or.aihub.mailsender.domain.user.dto.UserRegisterRequest;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -40,6 +41,57 @@ class UserTest {
             user = User.createWithPasswordEncoder(userRegisterRequest, passwordEncoder);
 
             assertThat(user.getPassword()).isNotEqualTo(password);
+        }
+    }
+
+    @Nested
+    @DisplayName("matchPassword 메서드는")
+    class Describe_matchPassword {
+
+        @Nested
+        @DisplayName("같은 비밀번호가 주어질 경우")
+        class Context_givenMatchPassword {
+            private String userPassword;
+            private String matchPassword;
+
+            @BeforeEach
+            void setUp() {
+                this.userPassword = "password";
+                this.matchPassword = this.userPassword;
+            }
+
+            @Test
+            @DisplayName("true를 리턴한다")
+            void It_returnsTrue() {
+                User user = TestUserFactory.create(userPassword, passwordEncoder);
+
+                boolean actual = user.matchPassword(matchPassword, passwordEncoder);
+
+                assertThat(actual).isTrue();
+            }
+        }
+
+        @Nested
+        @DisplayName("다른 비밀번호가 주어진 경우")
+        class Context_notMatchPassword {
+            private String userPassword;
+            private String notMatchPassword;
+
+            @BeforeEach
+            void setUp() {
+                this.userPassword = "password";
+                this.notMatchPassword = "xxxxx";
+            }
+
+            @Test
+            @DisplayName("false를 리턴한다")
+            void It_returnsFalse() {
+                User user = TestUserFactory.create(userPassword, passwordEncoder);
+
+                boolean actual = user.matchPassword(notMatchPassword, passwordEncoder);
+
+                assertThat(actual).isFalse();
+            }
         }
     }
 }

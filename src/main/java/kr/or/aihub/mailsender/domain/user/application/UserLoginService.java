@@ -47,21 +47,26 @@ public class UserLoginService {
     @Transactional(readOnly = true)
     public String login(UserLoginRequest userLoginRequest) {
         String username = userLoginRequest.getUsername();
-
         User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new UserNotFoundException(username));
 
         String password = userLoginRequest.getPassword();
-        String userPassword = user.getPassword();
-
-        boolean passwordMatch = passwordEncoder.matches(password, userPassword);
-        if (!passwordMatch) {
-            throw new PasswordNotMatchException(username);
-        }
-
+        checkMatch(user, password);
         checkActivate(user);
 
         return jwtCredentialEncoder.encode(user.getId());
+    }
+
+    /**
+     * 비밀번호가 일치한지 확인합니다.
+     *
+     * @param user     유저
+     * @param password 비밀번호
+     */
+    private void checkMatch(User user, String password) {
+        if (!user.matchPassword(password, passwordEncoder)) {
+            throw new PasswordNotMatchException(user.getUsername());
+        }
     }
 
     /**
