@@ -4,4 +4,9 @@ public enum RoleType {
     ROLE_DEACTIVATE,
     ROLE_ACTIVATE,
     ROLE_ADMIN,
+    ;
+
+    public boolean isAdminRoleType() {
+        return this.equals(ROLE_ADMIN);
+    }
 }

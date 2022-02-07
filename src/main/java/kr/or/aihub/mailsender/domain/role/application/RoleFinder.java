@@ -24,6 +24,7 @@ public class RoleFinder {
      *
      * @param userId 식별자
      * @return 찾은 권한 목록
+     * @throws UserNotFoundException 식별자로 유저를 찾지 못한 경우
      */
     public List<Role> findBy(Long userId) {
         User user = userRepository.findById(userId)
