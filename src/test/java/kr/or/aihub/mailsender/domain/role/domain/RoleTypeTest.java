@@ -30,7 +30,7 @@ class RoleTypeTest {
             void It_returnsTrue() {
                 RoleType roleType = adminRoleType;
 
-                boolean actual = roleType.isAdminRoleType();
+                boolean actual = roleType.isAdmin();
 
                 assertThat(actual).isTrue();
             }
@@ -49,7 +49,7 @@ class RoleTypeTest {
             )
             @DisplayName("false를 리턴한다")
             void It_returnsFalse(RoleType notAdminRoleType) {
-                boolean actual = notAdminRoleType.isAdminRoleType();
+                boolean actual = notAdminRoleType.isAdmin();
 
                 assertThat(actual).isFalse();
             }

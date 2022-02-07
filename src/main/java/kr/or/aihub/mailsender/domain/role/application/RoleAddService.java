@@ -56,7 +56,7 @@ public class RoleAddService {
      * @throws DeactivateUserException 비활성화된 유저가 어드민 권한을 요청한 경우
      */
     private void checkDeactivateUserRequestAdminRole(List<Role> userRoles, RoleType requestRoleType) {
-        if (!isActivateUser(userRoles) && requestRoleType.isAdminRoleType()) {
+        if (!isActivateUser(userRoles) && requestRoleType.isAdmin()) {
             throw new DeactivateUserException();
         }
     }
