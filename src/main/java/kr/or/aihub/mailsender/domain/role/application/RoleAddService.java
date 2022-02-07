@@ -1,12 +1,9 @@
 package kr.or.aihub.mailsender.domain.role.application;
 
 import kr.or.aihub.mailsender.domain.role.domain.Role;
-import kr.or.aihub.mailsender.domain.role.domain.RoleRepository;
 import kr.or.aihub.mailsender.domain.role.domain.RoleType;
 import kr.or.aihub.mailsender.domain.role.dto.RoleAddRequest;
 import kr.or.aihub.mailsender.domain.role.errors.AlreadyGrantedRoleException;
-import kr.or.aihub.mailsender.domain.user.domain.User;
-import kr.or.aihub.mailsender.domain.user.domain.UserRepository;
 import kr.or.aihub.mailsender.domain.user.error.DeactivateUserException;
 import kr.or.aihub.mailsender.domain.user.error.UserNotFoundException;
 import org.springframework.stereotype.Service;
@@ -18,18 +15,15 @@ import java.util.List;
  */
 @Service
 public class RoleAddService {
-    private final UserRepository userRepository;
-    private final RoleRepository roleRepository;
     private final RoleFinder roleFinder;
+    private final RoleSaver roleSaver;
 
     public RoleAddService(
-            UserRepository userRepository,
-            RoleRepository roleRepository,
-            RoleFinder roleFinder
+            RoleFinder roleFinder,
+            RoleSaver roleSaver
     ) {
-        this.userRepository = userRepository;
-        this.roleRepository = roleRepository;
         this.roleFinder = roleFinder;
+        this.roleSaver = roleSaver;
     }
 
     /**
@@ -44,22 +38,14 @@ public class RoleAddService {
      */
     public RoleType add(Long userId, RoleAddRequest roleAddRequest) {
         List<Role> userRoles = roleFinder.findBy(userId);
-
         RoleType requestRoleType = roleAddRequest.getRoleType();
+
         checkAlreadyGranted(userRoles, requestRoleType);
         checkDeactivateUserRequestAdminRole(userRoles, requestRoleType);
 
-        Role role = createRole(userId, requestRoleType);
-        roleRepository.save(role);
+        Role role = roleSaver.createAndSave(userId, requestRoleType);
 
         return role.getType();
-    }
-
-    private Role createRole(Long userId, RoleType requestRoleType) {
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new UserNotFoundException(userId));
-
-        return Role.create(user, requestRoleType);
     }
 
     /**
