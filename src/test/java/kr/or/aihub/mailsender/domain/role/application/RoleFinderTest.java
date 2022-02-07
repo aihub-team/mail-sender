@@ -37,7 +37,7 @@ class RoleFinderTest {
     private RoleFinder roleFinder;
 
     @AfterEach
-    void tearDown() {
+    void cleanUp() {
         roleRepository.deleteAll();
         userRepository.deleteAll();
     }
@@ -83,7 +83,7 @@ class RoleFinderTest {
                 User notSavedUser = TestUserFactory.create(passwordEncoder);
                 User savedUser = userRepository.save(notSavedUser);
 
-                userRepository.deleteAll();
+                cleanUp();
                 this.notExistUserId = savedUser.getId();
             }
 

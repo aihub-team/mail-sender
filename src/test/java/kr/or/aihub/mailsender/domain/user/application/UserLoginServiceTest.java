@@ -154,8 +154,7 @@ class UserLoginServiceTest {
 
             @BeforeEach
             void setUp() {
-                roleRepository.deleteAll();
-                userRepository.deleteAll();
+                cleanUp();
 
                 String username = "username";
                 String password = "password";
