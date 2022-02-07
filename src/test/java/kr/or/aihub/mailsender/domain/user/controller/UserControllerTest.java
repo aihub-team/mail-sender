@@ -1,11 +1,9 @@
 package kr.or.aihub.mailsender.domain.user.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import kr.or.aihub.mailsender.domain.role.TestRoleFactory;
 import kr.or.aihub.mailsender.domain.role.domain.Role;
 import kr.or.aihub.mailsender.domain.role.domain.RoleRepository;
 import kr.or.aihub.mailsender.domain.role.domain.RoleType;
-import kr.or.aihub.mailsender.domain.user.TestUserFactory;
 import kr.or.aihub.mailsender.domain.user.domain.User;
 import kr.or.aihub.mailsender.domain.user.domain.UserRepository;
 import kr.or.aihub.mailsender.domain.user.dto.UserLoginRequest;
@@ -29,7 +27,9 @@ import java.util.List;
 
 import static org.hamcrest.Matchers.matchesRegex;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrl;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -149,7 +149,7 @@ class UserControllerTest {
                     void setUp() {
                         String username = "username";
                         String password = "password";
-                        User user = TestUserFactory.create(username, password, passwordEncoder);
+                        User user = User.createWithPasswordEncoder(username, password, passwordEncoder);
 
                         userRepository.save(user);
 
@@ -186,10 +186,10 @@ class UserControllerTest {
                         void setUp() {
                             String username = "username";
                             String password = "password";
-                            User user = TestUserFactory.create(username, password, passwordEncoder);
+                            User user = User.createWithPasswordEncoder(username, password, passwordEncoder);
                             userRepository.save(user);
 
-                            Role role = TestRoleFactory.create(user, RoleType.ROLE_DEACTIVATE);
+                            Role role = Role.create(user, RoleType.ROLE_DEACTIVATE);
                             roleRepository.save(role);
 
                             deactivateLoginRequest = UserLoginRequest.builder()
@@ -221,10 +221,10 @@ class UserControllerTest {
                         void setUp() {
                             String username = "username";
                             String password = "password";
-                            User user = TestUserFactory.create(username, password, passwordEncoder);
+                            User user = User.createWithPasswordEncoder(username, password, passwordEncoder);
                             userRepository.save(user);
 
-                            Role role = TestRoleFactory.create(user, RoleType.ROLE_ACTIVATE);
+                            Role role = Role.create(user, RoleType.ROLE_ACTIVATE);
                             roleRepository.save(role);
 
                             activateUserLoginRequest = UserLoginRequest.builder()
@@ -303,7 +303,7 @@ class UserControllerTest {
             void setUp() {
                 String username = "username";
                 String password = "password";
-                User user = TestUserFactory.create(username, password, passwordEncoder);
+                User user = User.createWithPasswordEncoder(username, password, passwordEncoder);
 
                 userRepository.save(user);
 

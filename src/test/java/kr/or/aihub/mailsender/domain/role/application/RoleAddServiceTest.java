@@ -1,6 +1,5 @@
 package kr.or.aihub.mailsender.domain.role.application;
 
-import kr.or.aihub.mailsender.domain.role.TestRoleFactory;
 import kr.or.aihub.mailsender.domain.role.domain.Role;
 import kr.or.aihub.mailsender.domain.role.domain.RoleRepository;
 import kr.or.aihub.mailsender.domain.role.domain.RoleType;
@@ -53,7 +52,7 @@ class RoleAddServiceTest {
                 User deactivateUser = TestUserFactory.create(passwordEncoder);
                 userRepository.save(deactivateUser);
 
-                Role role = TestRoleFactory.create(deactivateUser, RoleType.ROLE_DEACTIVATE);
+                Role role = Role.create(deactivateUser, RoleType.ROLE_DEACTIVATE);
                 roleRepository.save(role);
 
                 this.deactivateUserId = deactivateUser.getId();
@@ -125,8 +124,8 @@ class RoleAddServiceTest {
                 User activateUser = TestUserFactory.create(passwordEncoder);
                 userRepository.save(activateUser);
 
-                Role deactivateRole = TestRoleFactory.create(activateUser, RoleType.ROLE_DEACTIVATE);
-                Role activateRole = TestRoleFactory.create(activateUser, RoleType.ROLE_ACTIVATE);
+                Role deactivateRole = Role.create(activateUser, RoleType.ROLE_DEACTIVATE);
+                Role activateRole = Role.create(activateUser, RoleType.ROLE_ACTIVATE);
                 roleRepository.save(deactivateRole);
                 roleRepository.save(activateRole);
 
@@ -199,9 +198,9 @@ class RoleAddServiceTest {
                 User user = TestUserFactory.create(passwordEncoder);
                 userRepository.save(user);
 
-                Role deactivateRole = TestRoleFactory.create(user, RoleType.ROLE_DEACTIVATE);
-                Role activateRole = TestRoleFactory.create(user, RoleType.ROLE_ACTIVATE);
-                Role adminRole = TestRoleFactory.create(user, RoleType.ROLE_ADMIN);
+                Role deactivateRole = Role.create(user, RoleType.ROLE_DEACTIVATE);
+                Role activateRole = Role.create(user, RoleType.ROLE_ACTIVATE);
+                Role adminRole = Role.create(user, RoleType.ROLE_ADMIN);
                 roleRepository.save(deactivateRole);
                 roleRepository.save(activateRole);
                 roleRepository.save(adminRole);

@@ -1,7 +1,7 @@
 package kr.or.aihub.mailsender.domain.role.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import kr.or.aihub.mailsender.domain.role.TestRoleFactory;
+import kr.or.aihub.mailsender.domain.role.domain.Role;
 import kr.or.aihub.mailsender.domain.role.domain.RoleRepository;
 import kr.or.aihub.mailsender.domain.role.domain.RoleType;
 import kr.or.aihub.mailsender.domain.role.dto.RoleAddRequest;
@@ -82,7 +82,7 @@ class RoleControllerTest {
 
     private void saveRoles(User user, List<RoleType> roleTypes) {
         roleTypes.stream()
-                .map(roleType -> TestRoleFactory.create(user, roleType))
+                .map(roleType -> Role.create(user, roleType))
                 .forEach(role -> roleRepository.save(role));
     }
 

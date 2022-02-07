@@ -1,30 +1,26 @@
 package kr.or.aihub.mailsender.domain.user;
 
 import kr.or.aihub.mailsender.domain.user.domain.User;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 /**
  * 테스트 유저 생성 담당.
  */
 public class TestUserFactory {
+    private static String DEFAULT_USERNAME = "username";
+    private static String DEFAULT_PASSWORD = "password";
+    private static PasswordEncoder DEFAULT_PASSWORD_ENCODER = new BCryptPasswordEncoder();
+
+    public static User create() {
+        return User.createWithPasswordEncoder(DEFAULT_USERNAME, DEFAULT_PASSWORD, DEFAULT_PASSWORD_ENCODER);
+    }
 
     public static User create(PasswordEncoder passwordEncoder) {
-        return create("username", "password", passwordEncoder);
+        return User.createWithPasswordEncoder(DEFAULT_USERNAME, DEFAULT_PASSWORD, passwordEncoder);
     }
 
-    /**
-     * 테스트 유저를 생성합니다.
-     *
-     * @param username        유저 이름
-     * @param password        유저 비밀번호
-     * @param passwordEncoder 비밀번호 암호화 구현체
-     * @return 생성된 테스트 유저
-     */
-    public static User create(String username, String password, PasswordEncoder passwordEncoder) {
-        return User.builder()
-                .username(username)
-                .password(passwordEncoder.encode(password))
-                .build();
+    public static User create(String password, PasswordEncoder passwordEncoder) {
+        return User.createWithPasswordEncoder(DEFAULT_USERNAME, password, passwordEncoder);
     }
-
 }

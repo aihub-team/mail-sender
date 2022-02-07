@@ -1,6 +1,7 @@
 package kr.or.aihub.mailsender.domain.role.domain;
 
 import kr.or.aihub.mailsender.domain.user.domain.User;
+import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 
@@ -29,10 +30,24 @@ public class Role {
     protected Role() {
     }
 
-    @Builder
-    public Role(User user, RoleType type) {
+    @Builder(access = AccessLevel.PRIVATE)
+    private Role(User user, RoleType type) {
         this.user = user;
         this.type = type;
     }
 
+    public static Role create(User user) {
+        return create(user, RoleType.ROLE_DEACTIVATE);
+    }
+
+    public static Role create(User user, RoleType roleType) {
+        return Role.builder()
+                .user(user)
+                .type(roleType)
+                .build();
+    }
+
+    public boolean isActivateType() {
+        return this.type.equals(RoleType.ROLE_ACTIVATE);
+    }
 }

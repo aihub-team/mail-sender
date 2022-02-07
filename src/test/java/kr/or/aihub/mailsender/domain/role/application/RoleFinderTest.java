@@ -1,6 +1,5 @@
 package kr.or.aihub.mailsender.domain.role.application;
 
-import kr.or.aihub.mailsender.domain.role.TestRoleFactory;
 import kr.or.aihub.mailsender.domain.role.domain.Role;
 import kr.or.aihub.mailsender.domain.role.domain.RoleRepository;
 import kr.or.aihub.mailsender.domain.user.TestUserFactory;
@@ -57,7 +56,7 @@ class RoleFinderTest {
                 User user = TestUserFactory.create(passwordEncoder);
                 userRepository.save(user);
 
-                Role role = TestRoleFactory.create(user, ROLE_DEACTIVATE);
+                Role role = Role.create(user, ROLE_DEACTIVATE);
                 roleRepository.save(role);
 
                 this.existUserId = user.getId();

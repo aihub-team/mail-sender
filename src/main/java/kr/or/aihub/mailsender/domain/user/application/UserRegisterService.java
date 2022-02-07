@@ -2,7 +2,6 @@ package kr.or.aihub.mailsender.domain.user.application;
 
 import kr.or.aihub.mailsender.domain.role.domain.Role;
 import kr.or.aihub.mailsender.domain.role.domain.RoleRepository;
-import kr.or.aihub.mailsender.domain.role.domain.RoleType;
 import kr.or.aihub.mailsender.domain.user.domain.User;
 import kr.or.aihub.mailsender.domain.user.domain.UserRepository;
 import kr.or.aihub.mailsender.domain.user.dto.UserRegisterRequest;
@@ -10,8 +9,6 @@ import kr.or.aihub.mailsender.domain.user.error.ConfirmPasswordNotMatchException
 import kr.or.aihub.mailsender.domain.user.error.ExistUsernameException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-
-import java.util.Objects;
 
 /**
  * 유저 회원가입 처리 담당.
@@ -41,45 +38,20 @@ public class UserRegisterService {
      * @throws ConfirmPasswordNotMatchException 비밀번호 확인이 틀릴 경우
      */
     public User registerUser(UserRegisterRequest userRegisterRequest) {
-        String password = userRegisterRequest.getPassword();
-        String confirmPassword = userRegisterRequest.getConfirmPassword();
-        checkMatch(password, confirmPassword);
+        checkPasswordMatchConfirmPassword(userRegisterRequest);
+        checkExistUsername(userRegisterRequest);
 
-        String username = userRegisterRequest.getUsername();
-        checkExist(username);
-
-        User user = createUser(username, password);
+        User user = User.createWithPasswordEncoder(userRegisterRequest, passwordEncoder);
         userRepository.save(user);
 
-        Role role = createRole(user);
+        Role role = Role.create(user);
         roleRepository.save(role);
 
         return user;
     }
 
-    private User createUser(String username, String password) {
-        return User.builder()
-                .username(username)
-                .password(passwordEncoder.encode(password))
-                .build();
-    }
-
-    private Role createRole(User user) {
-        return Role.builder()
-                .user(user)
-                .type(RoleType.ROLE_DEACTIVATE)
-                .build();
-    }
-
-    /**
-     * 비밀번호 확인이 일치한지 검사합니다.
-     *
-     * @param password        비밀번호
-     * @param confirmPassword 비밀번호 확인
-     * @throws ConfirmPasswordNotMatchException 비밀번호 확인이 틀릴 경우
-     */
-    private void checkMatch(String password, String confirmPassword) {
-        if (!Objects.equals(password, confirmPassword)) {
+    private void checkPasswordMatchConfirmPassword(UserRegisterRequest userRegisterRequest) {
+        if (!userRegisterRequest.matchPassword()) {
             throw new ConfirmPasswordNotMatchException();
         }
     }
@@ -87,13 +59,16 @@ public class UserRegisterService {
     /**
      * 유저 이름이 존재하는지 확인합니다.
      *
-     * @param username 유저 이름
+     * @param userRegisterRequest 회원 가입 요청 데이터
      * @throws ExistUsernameException 유저이름이 존재할 경우
      */
-    private void checkExist(String username) {
+    private void checkExistUsername(UserRegisterRequest userRegisterRequest) {
+        String username = userRegisterRequest.getUsername();
+
         userRepository.findByUsername(username)
                 .ifPresent(user -> {
                     throw new ExistUsernameException(user.getUsername());
                 });
     }
+
 }
