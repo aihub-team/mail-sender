@@ -1,6 +1,7 @@
 package kr.or.aihub.mailsender.domain.user;
 
 import kr.or.aihub.mailsender.domain.user.domain.User;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 /**
@@ -9,6 +10,11 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 public class TestUserFactory {
     private static String DEFAULT_USERNAME = "username";
     private static String DEFAULT_PASSWORD = "password";
+    private static PasswordEncoder DEFAULT_PASSWORD_ENCODER = new BCryptPasswordEncoder();
+
+    public static User create() {
+        return User.createWithPasswordEncoder(DEFAULT_USERNAME, DEFAULT_PASSWORD, DEFAULT_PASSWORD_ENCODER);
+    }
 
     public static User create(PasswordEncoder passwordEncoder) {
         return User.createWithPasswordEncoder(DEFAULT_USERNAME, DEFAULT_PASSWORD, passwordEncoder);

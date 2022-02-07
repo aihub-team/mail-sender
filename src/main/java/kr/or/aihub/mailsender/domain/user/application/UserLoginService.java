@@ -13,6 +13,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+
 /**
  * 유저 로그인 처리 담당.
  */
@@ -76,18 +78,16 @@ public class UserLoginService {
      * @throws DeactivateUserException 활성화되지 않은 유저일 경우
      */
     private void checkActivate(User user) {
-        boolean isActivateUser = roleRepository.findAllByUser(user).stream()
-                .anyMatch(role -> isActivate(role));
-
-        if (!isActivateUser) {
+        if (!isActivate(user)) {
             throw new DeactivateUserException(user.getUsername());
         }
     }
 
-    private boolean isActivate(Role role) {
-        String roleType = role.getType().toString();
+    private boolean isActivate(User user) {
+        List<Role> userAllRoles = roleRepository.findAllByUser(user);
 
-        return "ROLE_ACTIVATE".equals(roleType);
+        return userAllRoles.stream()
+                .anyMatch(Role::isActivateType);
     }
 
 }

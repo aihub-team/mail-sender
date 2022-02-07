@@ -46,4 +46,8 @@ public class Role {
                 .type(roleType)
                 .build();
     }
+
+    public boolean isActivateType() {
+        return this.type.equals(RoleType.ROLE_ACTIVATE);
+    }
 }

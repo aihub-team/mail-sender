@@ -1,5 +1,6 @@
 package kr.or.aihub.mailsender.domain.role.domain;
 
+import kr.or.aihub.mailsender.domain.role.TestRoleFactory;
 import kr.or.aihub.mailsender.domain.user.TestUserFactory;
 import kr.or.aihub.mailsender.domain.user.domain.User;
 import org.junit.jupiter.api.BeforeEach;
@@ -8,18 +9,12 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.security.crypto.password.PasswordEncoder;
 
+import static kr.or.aihub.mailsender.domain.role.domain.RoleType.ROLE_ACTIVATE;
 import static kr.or.aihub.mailsender.domain.role.domain.RoleType.ROLE_DEACTIVATE;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
-@SpringBootTest
 class RoleTest {
-
-    @Autowired
-    private PasswordEncoder passwordEncoder;
 
     @Nested
     @DisplayName("create 메서드는")
@@ -32,7 +27,7 @@ class RoleTest {
 
             @BeforeEach
             void setUp() {
-                this.user = TestUserFactory.create(passwordEncoder);
+                this.user = TestUserFactory.create();
             }
 
             @Test
@@ -51,7 +46,7 @@ class RoleTest {
 
             @BeforeEach
             void setUp() {
-                this.user = TestUserFactory.create(passwordEncoder);
+                this.user = TestUserFactory.create();
             }
 
             @ParameterizedTest
@@ -61,6 +56,52 @@ class RoleTest {
                 Role role = Role.create(user, roleType);
 
                 assertThat(role.getType()).isEqualTo(roleType);
+            }
+        }
+    }
+
+    @Nested
+    @DisplayName("isActivateType 메서드는")
+    class Describe_isActivateType {
+
+        @Nested
+        @DisplayName("Activate 타입이 주어지면")
+        class Context_activateType {
+            private RoleType activateRoleType;
+
+            @BeforeEach
+            void setUp() {
+                this.activateRoleType = ROLE_ACTIVATE;
+            }
+
+            @Test
+            @DisplayName("true를 리턴한다")
+            void It_returnsTrue() {
+                Role role = TestRoleFactory.create(activateRoleType);
+
+                boolean actual = role.isActivateType();
+
+                assertThat(actual).isTrue();
+            }
+        }
+
+        @Nested
+        @DisplayName("Activate가 아닌 타입이 주어지면")
+        class Context_notActivateType {
+
+            @ParameterizedTest
+            @EnumSource(
+                    value = RoleType.class,
+                    names = {"ROLE_ACTIVATE"},
+                    mode = EnumSource.Mode.EXCLUDE
+            )
+            @DisplayName("false를 리턴한다")
+            void It_returnsFalse(RoleType notActivateRoleType) {
+                Role role = TestRoleFactory.create(notActivateRoleType);
+
+                boolean actual = role.isActivateType();
+
+                assertThat(actual).isFalse();
             }
         }
     }
