@@ -14,7 +14,7 @@ class UserRegisterRequestTest {
     class Describe_matchPassword {
 
         @Nested
-        @DisplayName("비밀번호와 비밀번호 확인이 일치할 경우")
+        @DisplayName("비밀번호와 비밀번호 확인이 일치하지 않을 경우")
         class Context_notMatchPasswordAndConfirmPassword {
             private String password;
             private String confirmPassword;
