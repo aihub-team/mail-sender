@@ -14,11 +14,11 @@ import java.util.List;
  * 권한 추가 담당.
  */
 @Service
-public class RoleAddService {
+public class RoleAdder {
     private final RoleFinder roleFinder;
     private final RoleSaver roleSaver;
 
-    public RoleAddService(
+    public RoleAdder(
             RoleFinder roleFinder,
             RoleSaver roleSaver
     ) {

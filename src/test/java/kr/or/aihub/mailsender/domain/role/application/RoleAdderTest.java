@@ -21,13 +21,12 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 
-@DisplayName("RoleAddService 클래스")
 @SpringBootTest
 @AutoConfigureMockMvc
-class RoleAddServiceTest {
+class RoleAdderTest {
 
     @Autowired
-    private RoleAddService roleAddService;
+    private RoleAdder roleAdder;
 
     @Autowired
     private PasswordEncoder passwordEncoder;
@@ -71,7 +70,7 @@ class RoleAddServiceTest {
                 @Test
                 @DisplayName("이미 부여된 권한 예외를 던진다")
                 void It_throwsAlreadyGrantedRoleException() {
-                    assertThatThrownBy(() -> roleAddService.add(deactivateUserId, this.deactivateRoleAddRequest))
+                    assertThatThrownBy(() -> roleAdder.add(deactivateUserId, this.deactivateRoleAddRequest))
                             .isInstanceOf(AlreadyGrantedRoleException.class);
                 }
             }
@@ -89,7 +88,7 @@ class RoleAddServiceTest {
                 @Test
                 @DisplayName("부여된 권한을 리턴한다")
                 void It_returnsGrantedRole() {
-                    RoleType roleType = roleAddService.add(deactivateUserId, this.activateRoleAddRequest);
+                    RoleType roleType = roleAdder.add(deactivateUserId, this.activateRoleAddRequest);
 
                     assertThat(roleType).isEqualTo(RoleType.ROLE_ACTIVATE);
                 }
@@ -108,7 +107,7 @@ class RoleAddServiceTest {
                 @Test
                 @DisplayName("비활성화된 유저 예외를 던진다")
                 void It_throwsDeactivateUser() {
-                    assertThatThrownBy(() -> roleAddService.add(deactivateUserId, this.adminRoleAddRequest))
+                    assertThatThrownBy(() -> roleAdder.add(deactivateUserId, this.adminRoleAddRequest))
                             .isInstanceOf(DeactivateUserException.class);
                 }
             }
@@ -145,7 +144,7 @@ class RoleAddServiceTest {
                 @Test
                 @DisplayName("이미 부여된 권한 예외를 던진다")
                 void It_throwsAlreadyGrantedRoleException() {
-                    assertThatThrownBy(() -> roleAddService.add(activateUserId, this.deactivateRoleAddRequest))
+                    assertThatThrownBy(() -> roleAdder.add(activateUserId, this.deactivateRoleAddRequest))
                             .isInstanceOf(AlreadyGrantedRoleException.class);
                 }
             }
@@ -163,7 +162,7 @@ class RoleAddServiceTest {
                 @Test
                 @DisplayName("부여된 권한을 리턴한다")
                 void It_returnsGrantedRole() {
-                    assertThatThrownBy(() -> roleAddService.add(activateUserId, this.activateRoleAddRequest))
+                    assertThatThrownBy(() -> roleAdder.add(activateUserId, this.activateRoleAddRequest))
                             .isInstanceOf(AlreadyGrantedRoleException.class);
                 }
             }
@@ -181,7 +180,7 @@ class RoleAddServiceTest {
                 @Test
                 @DisplayName("부여된 권한을 리턴한다")
                 void It_throws() {
-                    RoleType actual = roleAddService.add(activateUserId, this.adminRoleAddRequest);
+                    RoleType actual = roleAdder.add(activateUserId, this.adminRoleAddRequest);
 
                     assertThat(actual).isEqualTo(RoleType.ROLE_ADMIN);
                 }
@@ -221,7 +220,7 @@ class RoleAddServiceTest {
                 @Test
                 @DisplayName("이미 부여된 권한 예외를 던진다")
                 void It_throwsAlreadyGrantedRoleException() {
-                    assertThatThrownBy(() -> roleAddService.add(adminUserId, this.deactivateRoleAddRequest))
+                    assertThatThrownBy(() -> roleAdder.add(adminUserId, this.deactivateRoleAddRequest))
                             .isInstanceOf(AlreadyGrantedRoleException.class);
                 }
             }
@@ -239,7 +238,7 @@ class RoleAddServiceTest {
                 @Test
                 @DisplayName("이미 부여된 권한 예외를 던진다")
                 void It_throwsAlreadyGrantedRoleException() {
-                    assertThatThrownBy(() -> roleAddService.add(adminUserId, this.activateRoleAddRequest))
+                    assertThatThrownBy(() -> roleAdder.add(adminUserId, this.activateRoleAddRequest))
                             .isInstanceOf(AlreadyGrantedRoleException.class);
                 }
             }
@@ -257,7 +256,7 @@ class RoleAddServiceTest {
                 @Test
                 @DisplayName("이미 부여된 권한 예외를 던진다")
                 void It_throwsAlreadyGrantedRoleException() {
-                    assertThatThrownBy(() -> roleAddService.add(adminUserId, this.adminRoleAddRequest))
+                    assertThatThrownBy(() -> roleAdder.add(adminUserId, this.adminRoleAddRequest))
                             .isInstanceOf(AlreadyGrantedRoleException.class);
                 }
             }
